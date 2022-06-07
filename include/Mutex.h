@@ -25,6 +25,7 @@ public:
 
 private:
   friend class MutexLockGuard;
+  friend class UniqueLock;
   std::mutex mutex_;
   CurrentThread::ThreadId id_holder_;
 };
@@ -38,6 +39,25 @@ class MutexLockGuard:noncopyable
     {}
     private:
     std::lock_guard<std::mutex> guard_;
+};
+
+/*包装了标准库中的std::unique_lock*/
+class UniqueLock:noncopyable
+{
+  public:
+  explicit UniqueLock(MutexLock& mutex)
+  :unique_lock_(mutex.mutex_)
+  {}
+  public:
+  void lock(){
+    unique_lock_.lock();
+  }
+  void unlock(){
+    unique_lock_.unlock();
+  }
+  private:
+  friend class Condition;
+  std::unique_lock<std::mutex> unique_lock_;
 };
 } // namespace feipu
 #endif
