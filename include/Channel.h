@@ -24,6 +24,8 @@ namespace feipu{
             loop_(loop)
             {}
             int fd(){return fd_;}
+            int index(){return index_;}
+            void setIndex(int index){index_ = index;}
             void setReadCall(ReadCallBack cb){readcall_ = cb;}
             void enableRead(){
                 assert(readcall_);
@@ -49,10 +51,12 @@ namespace feipu{
             }
             short events(){return events_;}
             void set_revents(int revent){revents_ = revent;}
+            Eventloop* getloop() { return loop_;}
         private:
             ReadCallBack readcall_;
             WriteCallBack writecall_;
             int fd_;
+            int index_; // 记录在fds中的index便于删除
             short events_;
             short revents_;
             Eventloop* loop_;

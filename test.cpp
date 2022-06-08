@@ -12,11 +12,11 @@
 using feipu::Eventloop;
 using feipu::Logger;
 int fd;
-void test_thread()
+void test_thread(feipu::Channel* channel)
 {
+  channel->enableRead();
   while(true)
   {
-
   }
 }
 void test_fuc() {
@@ -48,17 +48,12 @@ int main() {
   LOG_DEBUG << "debug ???";
   // LOG_FATAL << "to abort";
   Eventloop myloop;
-  feipu::Thread t1(test_thread);
-  auto tid1 = t1.get_tid();
-  LOG_INFO << "tid1 = " << tid1;
-  int count = 100000;
-  ::sleep(1);
-  tid1 = t1.get_tid();
-  LOG_INFO << "tid1 = " << tid1;
   myloop.RunEvery(1, time_test);
   myloop.RunEvery(5, time_test2);
   myloop.RunEvery(3, time_test3);
   feipu::Channel mychannel(fd, &myloop);
+  feipu::Channel mychannel2(fd, &myloop);
+  feipu::Thread t1(std::bind(test_thread,&mychannel2));
   mychannel.setReadCall(test_fuc);
   mychannel.enableRead();
   myloop.loop();
