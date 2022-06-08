@@ -12,14 +12,14 @@ public:
 
   void lock() {
     mutex_.lock();
-    id_holder_ = CurrentThread::get_id();
+    id_holder_ = CurrentThread::get_tid();
   }
   void unlock() {
-    id_holder_ = CurrentThread::ThreadId();
+    id_holder_ = 0;
     mutex_.unlock();
   }
   bool isLockByThisThread() const {
-    return id_holder_ == CurrentThread::get_id();
+    return id_holder_ == CurrentThread::get_tid();
   }
   void assertLocked() const { assert(isLockByThisThread()); }
 
@@ -27,7 +27,7 @@ private:
   friend class MutexLockGuard;
   friend class UniqueLock;
   std::mutex mutex_;
-  CurrentThread::ThreadId id_holder_;
+  pid_t id_holder_;
 };
 
 /*以下简单的包装了lockguard*/

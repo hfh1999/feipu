@@ -6,15 +6,15 @@
 #include "Mutex.h"
 namespace feipu {
 /*对标准库condition的包装*/
+// TODO 修改condition使其和标准库用法一致
 class Condition : noncopyable {
 public:
-    Condition(UniqueLock& lock):
-    lock_(lock.unique_lock_)
+    Condition()
     {}
 
-    void wait()
+    void wait(UniqueLock& lock)
     {
-        cv_.wait(lock_);
+        cv_.wait(lock.unique_lock_);
     }
     void notify(){
         cv_.notify_one();
@@ -24,7 +24,6 @@ public:
     }
 private:
     std::condition_variable cv_;
-    std::unique_lock<std::mutex>& lock_;
 };
 } // namespace feipu
 #endif

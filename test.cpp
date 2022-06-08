@@ -1,14 +1,24 @@
 #include "Channel.h"
 #include "EventLoop.h"
+#include "Logging.h"
 #include "Timer.h"
 #include <bits/types/__FILE.h>
 #include <cstdio>
 #include <fcntl.h>
+#include <sys/syscall.h>
+#include <syscall.h>
 #include <unistd.h>
-#include "Logging.h"
+#include "Thread.h"
 using feipu::Eventloop;
 using feipu::Logger;
 int fd;
+void test_thread()
+{
+  while(true)
+  {
+
+  }
+}
 void test_fuc() {
   char buffer[1024 * 6];
   int count = 0;
@@ -36,8 +46,15 @@ int main() {
   fd = ::open("/dev/pts/1", O_RDONLY | O_NONBLOCK);
   LOG_TRACE << "trace ???";
   LOG_DEBUG << "debug ???";
-  LOG_FATAL << "to abort";
+  // LOG_FATAL << "to abort";
   Eventloop myloop;
+  feipu::Thread t1(test_thread);
+  auto tid1 = t1.get_tid();
+  LOG_INFO << "tid1 = " << tid1;
+  int count = 100000;
+  ::sleep(1);
+  tid1 = t1.get_tid();
+  LOG_INFO << "tid1 = " << tid1;
   myloop.RunEvery(1, time_test);
   myloop.RunEvery(5, time_test2);
   myloop.RunEvery(3, time_test3);

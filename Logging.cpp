@@ -24,7 +24,7 @@ Logger::Logger(const char *file, int line, LoggerLevel level)
   const char *path_sep_pos = ::strrchr(file, '/');
   basename_ =
       (path_sep_pos == nullptr) ? file : path_sep_pos + 1; // 求文件的basename
-  stream_ << CurrentThread::get_id_string() << logLevelStr_[level] << " ";
+  stream_ << CurrentThread::get_tid_string() << logLevelStr_[level] << " ";
 }
 Logger::Logger(const char *file, int line, LoggerLevel level, const char *func)
     : stream_(), basename_(), line_(line), level_(level) 
@@ -32,7 +32,7 @@ Logger::Logger(const char *file, int line, LoggerLevel level, const char *func)
   const char *path_sep_pos = ::strrchr(file, '/');
   basename_ =
       (path_sep_pos == nullptr) ? file : path_sep_pos + 1; // 求文件的basename
-  stream_ << CurrentThread::get_id_string() << logLevelStr_[level] << " " << func << " ";
+  stream_ << CurrentThread::get_tid_string() << logLevelStr_[level] << " " << func << " ";
 }
 Logger::~Logger() {
   stream_ <<" - "<< basename_ <<":"<<line_<<'\n';
