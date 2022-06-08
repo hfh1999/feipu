@@ -1,11 +1,11 @@
 #include "CurrentThread.h"
+#include <unistd.h>
+#include <sys/syscall.h>
 namespace feipu {
 namespace CurrentThread {
 __thread pid_t cached_tid = 0; // 缓存，避免每次都进行系统调用
 std::string get_tid_string() {
-  char buffer[7];
-  ::snprintf(buffer, 7, "%-6d", get_tid());
-  return std::string(buffer);
+  return string_format("%5d ",get_tid());
 }
 pid_t get_tid() {
   if (cached_tid == 0) {

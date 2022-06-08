@@ -2,7 +2,6 @@
 #define TIMER_H
 #include "CallBack.h"
 #include "Timestamp.h"
-#include <bits/stdint-intn.h>
 namespace feipu {
 /*这个类中包含了有关定时器时间及定时调用的信息*/
 class Timer {

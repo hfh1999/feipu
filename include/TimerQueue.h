@@ -1,10 +1,8 @@
 #ifndef TIMERQUEUE_H
 #define TIMERQUEUE_H
 /* 这个类用于管理定时器 */
-#include <algorithm>
-#include <bits/stdint-intn.h>
-#include <cstdint>
 #include <iterator>
+#include "FeiTypes.h"
 #include <set>
 #include "EventLoop.h"
 #include "Timer.h"

@@ -1,8 +1,6 @@
 #ifndef TIMESTAMP_H
 #define TIMESTAMP_H
-#include <bits/stdint-intn.h>
-#include <bits/types/struct_timeval.h>
-#include <cstdint>
+#include "FeiTypes.h"
 #include <sys/time.h>
 /*我们在库中使用TimeStamp来表示绝对时间*/
 namespace feipu{
@@ -13,6 +11,14 @@ public:
       : microSecondsSinceEpoch_(microSecondsFromEpoch) {}
   int64_t GetmicroSecondsSinceEpoch() { return microSecondsSinceEpoch_; }
   static TimeStamp now();
+  string toFormattedString() const{
+    time_t seconds = static_cast<time_t>(microSecondsSinceEpoch_/MicroSecondPerSecond);
+    int microsecends = static_cast<int>(microSecondsSinceEpoch_%MicroSecondPerSecond);
+    struct tm tm_time;
+    ::gmtime_r(&seconds,&tm_time);
+    return string_format("%4d-%02d-%02d %02d:%02d:%02d.%06d",tm_time.tm_year + 1900,tm_time.tm_mon + 1,tm_time.tm_mday,
+    tm_time.tm_hour,tm_time.tm_min,tm_time.tm_sec,microsecends);
+  }
   static const int MicroSecondPerSecond = 1000 * 1000;
 private:
   int64_t microSecondsSinceEpoch_;
