@@ -27,5 +27,8 @@ namespace feipu {
         noncopyable() = default;
         ~noncopyable() = default;
     };
+    class copyable{
+
+    };
 }
 #endif

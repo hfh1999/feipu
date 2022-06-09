@@ -1,8 +1,9 @@
-#include "FeiSocket.h"
+#include "FeiSocketops.h"
 #include <sys/socket.h>
 #include "Logging.h"
 #include <fcntl.h>
 #include <unistd.h>
+#include <arpa/inet.h>
 namespace feipu {
 namespace socket {
 uint32_t hostToNetwork32(uint32_t hostlong) { return ::htonl(hostlong); }
@@ -35,7 +36,7 @@ int createNonBlockingOrDie(){
 }
 
 
-int connect(int sockfd,const struct sockaddr_in& addr){
+int connect(int sockfd,const sockaddr_in& addr){
     return ::connect(sockfd, reinterpret_cast<const struct sockaddr*>(&addr), sizeof(addr));
 }
 
@@ -75,6 +76,15 @@ void shutdownWriteOrDie(int sockfd)
     if(::shutdown(sockfd, SHUT_WR))
     {
         LOG_FATAL << "sockets: shutdownWrite error.";
+    }
+}
+void fromHostPort(const char* ip,uint16_t port,struct sockaddr_in* addr)
+{
+    addr->sin_family = AF_INET;
+    addr->sin_port = port;
+    if(inet_pton(AF_INET,ip,&addr->sin_addr) <= 0)
+    {
+        LOG_FATAL << "sockets: inet_pton error.";
     }
 }
 } // namespace socket

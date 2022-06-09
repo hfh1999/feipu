@@ -5,7 +5,7 @@
 #ifndef FEISOCKET_H
 #define FEISOCKET_H
 #include "FeiTypes.h"
-#include <arpa/inet.h>
+class  sockaddr_in;
 namespace feipu {
 namespace socket {
 uint32_t hostToNetwork32(uint32_t);
@@ -20,6 +20,7 @@ void listenOrDie(int sockfd);
 int accept(int sockfd,struct sockaddr_in* addr);
 void closeOrDie(int sockfd);
 void shutdownWriteOrDie(int sockfd);
+void fromHostPort(const char* ip,uint16_t port,struct sockaddr_in* addr);
 } // namespace socket
 } // namespace feipu
 #endif
