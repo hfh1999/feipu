@@ -21,4 +21,13 @@ InetAddress::InetAddress(const struct sockaddr_in& addr)
 :addr_(new sockaddr_in(addr))
 {
 }
+InetAddress::InetAddress(const InetAddress& to_copy)
+:addr_(new sockaddr_in(*(to_copy.addr_)))
+{
+}
+InetAddress& InetAddress::operator=(const InetAddress& rhs)
+{
+    *addr_ = *(rhs.addr_);
+    return *this;
+}
 }

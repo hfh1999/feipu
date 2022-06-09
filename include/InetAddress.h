@@ -10,6 +10,8 @@ class InetAddress:copyable{
 
     InetAddress(const string& ip , uint16_t port);
     InetAddress(const struct sockaddr_in& addr);
+    InetAddress(const InetAddress&); // copy
+    InetAddress& operator=(const InetAddress&); // assign;
     private:
     std::unique_ptr<sockaddr_in> addr_; // 这是为了不暴露底层的数据
 };
