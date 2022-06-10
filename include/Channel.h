@@ -6,8 +6,6 @@
 #include <sys/poll.h>
 #include <cassert>
 using std::function;
-typedef function<void(void)> ReadCallBack;
-typedef function<void(void)> WriteCallBack;
 namespace feipu{
     // Channel 保存调用，在回调时根据poller的返回值来确定是什么回调
     const int NoneEvent = 0;
@@ -16,21 +14,18 @@ namespace feipu{
     class Eventloop;
     class Channel{
         public:
-            Channel(int fd,Eventloop* loop):
-            readcall_(),
-            writecall_(),
-            fd_(fd),
-            events_(0),
-            loop_(loop)
-            {}
-            int fd(){return fd_;}
-            int index(){return index_;}
-            void setIndex(int index){index_ = index;}
-            void setReadCall(ReadCallBack cb){readcall_ = cb;}
-            void enableRead(){
-                assert(readcall_);
-                events_ |= ReadEvent;
-                register_loop();
+          typedef function<void(void)> ReadCallBack;
+          typedef function<void(void)> WriteCallBack;
+          Channel(int fd, Eventloop *loop)
+              : readcall_(), writecall_(), fd_(fd), events_(0), loop_(loop) {}
+          int fd() { return fd_; }
+          int index() { return index_; }
+          void setIndex(int index) { index_ = index; }
+          void setReadCall(ReadCallBack cb) { readcall_ = cb; }
+          void enableRead() {
+            assert(readcall_);
+            events_ |= ReadEvent;
+            register_loop();
             }
             void setWriteCall(WriteCallBack cb){writecall_ = cb;}
             void enableWrite(){

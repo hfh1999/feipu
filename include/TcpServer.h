@@ -50,8 +50,11 @@ class TcpServer:noncopyable
     public:
     TcpServer(Eventloop* loop,InetAddress listenAddr,string name);
     void start();
-    void whenNewConnection(int remoteFd,InetAddress remoteAddr);
+    void setConnectionCallback();
+    void setMessageCallback();
+    void setWriteAllCallback();
     private:
+    void whenNewConnection(int remoteFd,InetAddress remoteAddr);
     InetAddress addr_;
     string name_;
     Acceptor acceptor_;
