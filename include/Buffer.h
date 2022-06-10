@@ -5,6 +5,7 @@
 /*用于TcpConnection的一个类似于队列的buffer*/
 /*线程不安全*/
 /*TODO: 希望能改进使得不暴露buffer*/
+/*TODO: 希望能改进实现zero copy*/
 namespace feipu {
 class Buffer {
 public:
@@ -18,6 +19,7 @@ public:
 
   void append(const string &str); // 向buffer中添加数据,无需确认可写的大小
   void append(const char* data,size_t len);
+  void readFd(int fd);
 
 private:
   size_t getWriteableBytes() { return data_.size() - writeIndex_; }

@@ -6,6 +6,7 @@
 #include "FeiSocketops.h"
 #include <arpa/inet.h>
 #include "Logging.h"
+#include "CallBack.h"
 namespace feipu {
 class Eventloop;
 
@@ -50,14 +51,17 @@ class TcpServer:noncopyable
     public:
     TcpServer(Eventloop* loop,InetAddress listenAddr,string name);
     void start();
-    void setConnectionCallback();
-    void setMessageCallback();
+    void setConnectionCallback(const ConnectionCallback& cb){conn_cb_ = cb;}
+    void setMessageCallback(const MessageCallback& cb){message_cb_ = cb;}
     void setWriteAllCallback();
     private:
     void whenNewConnection(int remoteFd,InetAddress remoteAddr);
+    Eventloop* loop_;
     InetAddress addr_;
     string name_;
     Acceptor acceptor_;
+    ConnectionCallback conn_cb_;
+    MessageCallback message_cb_;
 };
 }
 #endif

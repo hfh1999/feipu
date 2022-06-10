@@ -36,6 +36,8 @@ CurrentThread.cpp
 FeiSocketops.cpp
 InetAddress.cpp
 TcpServer.cpp
+TcpConnection.cpp
+Buffer.cpp
 )
 include_directories(${DUOMU_INCLUDE})
 add_library(feipu ${feipu_SRCS})
