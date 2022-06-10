@@ -12,6 +12,8 @@ class InetAddress:copyable{
     InetAddress(const struct sockaddr_in& addr);
     InetAddress(const InetAddress&); // copy
     InetAddress& operator=(const InetAddress&); // assign;
+    const sockaddr_in& getRawSockAddr() const {return *addr_;}
+    ~InetAddress();
     private:
     std::unique_ptr<sockaddr_in> addr_; // 这是为了不暴露底层的数据
 };

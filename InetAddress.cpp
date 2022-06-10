@@ -30,4 +30,5 @@ InetAddress& InetAddress::operator=(const InetAddress& rhs)
     *addr_ = *(rhs.addr_);
     return *this;
 }
+InetAddress::~InetAddress(){}
 }
