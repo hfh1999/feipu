@@ -1,14 +1,33 @@
 #ifndef BUFFER_H
 #define BUFFER_H
-/*用于TcpConnection的一个类似于队列的buffer*/
-/*TODO: 希望能改进使得不暴露buffer*/
+#include <FeiTypes.h>
 #include <vector>
+/*用于TcpConnection的一个类似于队列的buffer*/
+/*线程不安全*/
+/*TODO: 希望能改进使得不暴露buffer*/
 namespace feipu {
-    class Buffer{
-        public:
-            Buffer(){}
-        private:
-        std::vector<char> data_;
-    };
-}
+class Buffer {
+public:
+  Buffer();
+  size_t getReadableBytes() { return writeIndex_ - readIndex_; }
+  size_t getPrependableBytes() { return readIndex_; }
+  const char *peek() const { return &*(data_.begin()); }
+  void retrieve(size_t len);           //调用前需确认可读的大小
+  void retrieveUntil(const char *end); //同样需要确认
+  void retrieveAll();
+
+  void append(const string &str); // 向buffer中添加数据,无需确认可写的大小
+  void append(const char* data,size_t len);
+
+private:
+  size_t getWriteableBytes() { return data_.size() - writeIndex_; }
+  void makeSpace(size_t len);
+  typedef std::vector<char>::size_type BufSizeType; // is size_t
+  static const BufSizeType DefaultSize = 1024;
+  static const BufSizeType DefaultPreSize = 8;
+  std::vector<char> data_;
+  BufSizeType readIndex_;
+  BufSizeType writeIndex_;
+};
+} // namespace feipu
 #endif
