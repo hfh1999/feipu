@@ -6,7 +6,7 @@ class sockaddr_in;
 namespace feipu {
 class InetAddress:copyable{
     public:
-    explicit InetAddress(int32_t port);
+    explicit InetAddress(int16_t port);
 
     InetAddress(const string& ip , uint16_t port);
     InetAddress(const struct sockaddr_in& addr);

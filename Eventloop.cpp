@@ -99,5 +99,9 @@ void Eventloop::RunEvery(double interval, TimerCallback cb) {
 bool Eventloop::isInLoopThread() const {
   return tid_ == CurrentThread::get_tid();
 }
-void Eventloop::assertInLoopThread() { LOG_FATAL << "threadId=" << tid_; }
+void Eventloop::assertInLoopThread() {
+  if (!isInLoopThread()) {
+    LOG_FATAL << "threadId=" << tid_;
+  }
+}
 } // namespace feipu

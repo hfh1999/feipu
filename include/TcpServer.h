@@ -5,6 +5,7 @@
 #include "Channel.h"
 #include "FeiSocketops.h"
 #include <arpa/inet.h>
+#include "Logging.h"
 namespace feipu {
 class Eventloop;
 
@@ -17,6 +18,7 @@ Acceptor(Eventloop* loop,InetAddress listenAddr)
 channel_(new Channel(sockfd_,loop))
 {
     socket::bindOrDie(sockfd_, listenAddr.getRawSockAddr());
+    LOG_INFO << "has bind";
 }
 void start(){
     socket::listenOrDie(sockfd_);

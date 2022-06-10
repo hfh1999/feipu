@@ -45,7 +45,7 @@ namespace feipu{
                 }
                 if(revents_ &(POLLIN | POLLPRI | POLLRDHUP))
                 {
-                    ::printf("readcall happen.\n");
+                    //::printf("readcall happen.\n");
                     readcall_();
                 }
             }
