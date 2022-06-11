@@ -13,8 +13,10 @@ namespace feipu {
 class TcpConnection : noncopyable, std::enable_shared_from_this<TcpConnection> {
 public:
   TcpConnection(Eventloop *loop, int connfd, InetAddress connAddr);
+  ~TcpConnection();
   void setMessageCallback(const MessageCallback &cb) { message_cb_ = cb; }
   void setConnectionCallback(const ConnectionCallback& cb){conn_cb_ = cb;}
+  void setCloseCallback(const CloseCallback& cb){close_cb_ = cb;}
   void connectEstablished();
 
 private:
@@ -25,6 +27,7 @@ private:
   Eventloop *loop_;
   MessageCallback message_cb_;
   ConnectionCallback conn_cb_;
+  CloseCallback close_cb_;
   std::unique_ptr<Channel> channel_;
   Buffer inBuffer_;
   Buffer outBuffer_;

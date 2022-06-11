@@ -19,7 +19,7 @@ public:
 
   void append(const string &str); // 向buffer中添加数据,无需确认可写的大小
   void append(const char* data,size_t len);
-  void readFd(int fd);
+  size_t readFd(int fd);
 
 private:
   size_t getWriteableBytes() { return data_.size() - writeIndex_; }

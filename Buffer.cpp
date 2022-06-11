@@ -36,7 +36,7 @@ void Buffer::makeSpace(size_t len) {
     data_.resize(writeIndex_ + len);
   }
 }
-void Buffer::readFd(int fd) {
+size_t Buffer::readFd(int fd) {
   char extrabuf[65536];
   struct iovec vec[2];
   vec[0].iov_base = &*(data_.begin() + writeIndex_);
@@ -53,5 +53,6 @@ void Buffer::readFd(int fd) {
     writeIndex_ = data_.size();
     append(extrabuf, n - oldWriteable);
   }
+  return n;
 }
 } // namespace feipu
