@@ -19,6 +19,7 @@ typedef std::shared_ptr<TcpConnection> TcpConnectionPtr;
 typedef std::function<void()> TimerCallback;
 typedef std::function<void(TcpConnectionPtr)> ConnectionCallback;
 typedef std::function<void(TcpConnectionPtr)> CloseCallback;
+typedef std::function<void(TcpConnectionPtr)> WriteAllCallback;
 typedef std::function<void(TcpConnectionPtr,Buffer*)> MessageCallback;
 
 }

@@ -20,12 +20,13 @@ void TcpServer::whenNewConnection(int remoteFd,InetAddress remoteAddr){
     newConn->setConnectionCallback(conn_cb_);
     newConn->setCloseCallback(std::bind(&TcpServer::whenOldConnDisconnect,this,_1));
     newConn->setMessageCallback(message_cb_);
+    newConn->setWriteCallback(write_cb_);
 
     //2. 所有权记录
     connections_.insert(newConn);
 
     //3. 回调connectionCallback.
-    newConn->connectEstablished();
+    newConn->connectEstablished();// 在TcpServer的线程中
     // conn_cb_(newConn); 也可以
 }
 
@@ -34,5 +35,6 @@ void TcpServer::whenOldConnDisconnect(TcpConnectionPtr conn){
     size_t n = connections_.count(conn);
     assert(n != 0); // 必然有
     connections_.erase(conn);
+    conn_cb_(conn); // 断开连接时也调用connectCallBack.
 }
 } // namespace feipu

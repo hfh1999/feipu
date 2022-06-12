@@ -56,11 +56,11 @@ void Eventloop::loop() {
     timer_queue_->handleTimeEvent();
   }
 }
-void Eventloop::addChannel(Channel *in_channel) {
+void Eventloop::update_channel(Channel *in_channel) {
   assert(in_channel->getloop() == this);
   assertInLoopThread(); // 确保这一函数只能在它的io线程内调用
                         // 因为要确保每个channel都是完全属于某个io线程的
-  addChannelHelper(in_channel);
+  updateChannelHelper(in_channel);
 }
 void Eventloop::removeChannel(Channel *in_channel) {
   assert(in_channel->getloop() == this);
@@ -70,9 +70,16 @@ void Eventloop::removeChannel(Channel *in_channel) {
 }
 
 /*重复添加是可以的*/
-void Eventloop::addChannelHelper(Channel *in_channel) {
-  if (fd_channel_map_.find(in_channel->fd()) != fd_channel_map_.end())
+void Eventloop::updateChannelHelper(Channel *in_channel) {
+  if (fd_channel_map_.find(in_channel->fd()) != fd_channel_map_.end()) {
+    // 找到了，说明是旧channel更新
+    assert(fd_channel_map_[in_channel->fd()]->fd() == in_channel->fd());//fd 不可能变动
+    struct pollfd tmppoll_fd;
+    tmppoll_fd.fd = in_channel->fd();
+    tmppoll_fd.events = in_channel->events();
+    pollfds_[fd_channel_map_[in_channel->fd()]->index()] = tmppoll_fd;
     return;
+  }
   fd_channel_map_[in_channel->fd()] = in_channel;
   struct pollfd tmppoll_fd;
   tmppoll_fd.fd = in_channel->fd();

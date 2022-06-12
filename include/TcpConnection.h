@@ -17,6 +17,8 @@ public:
   void setMessageCallback(const MessageCallback &cb) { message_cb_ = cb; }
   void setConnectionCallback(const ConnectionCallback& cb){conn_cb_ = cb;}
   void setCloseCallback(const CloseCallback& cb){close_cb_ = cb;}
+  void setWriteCallback(const WriteAllCallback& cb){write_cb_ = cb;}
+  void send(const char* data,size_t len);
   void connectEstablished();
 
 private:
@@ -28,6 +30,7 @@ private:
   MessageCallback message_cb_;
   ConnectionCallback conn_cb_;
   CloseCallback close_cb_;
+  WriteAllCallback write_cb_;
   std::unique_ptr<Channel> channel_;
   Buffer inBuffer_;
   Buffer outBuffer_;

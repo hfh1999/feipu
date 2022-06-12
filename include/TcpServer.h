@@ -54,7 +54,7 @@ class TcpServer:noncopyable
     void start();
     void setConnectionCallback(const ConnectionCallback& cb){conn_cb_ = cb;}
     void setMessageCallback(const MessageCallback& cb){message_cb_ = cb;}
-    void setWriteAllCallback();
+    void setWriteAllCallback(const WriteAllCallback& cb){}
     private:
     void whenNewConnection(int remoteFd,InetAddress remoteAddr);
     void whenOldConnDisconnect(TcpConnectionPtr conn);
@@ -65,6 +65,7 @@ class TcpServer:noncopyable
     std::set <TcpConnectionPtr> connections_; // 对connection有拥有权
     ConnectionCallback conn_cb_;
     MessageCallback message_cb_;
+    WriteAllCallback write_cb_;
 };
 }
 #endif
