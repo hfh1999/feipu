@@ -12,7 +12,7 @@ public:
   Buffer();
   size_t getReadableBytes() { return writeIndex_ - readIndex_; }
   size_t getPrependableBytes() { return readIndex_; }
-  const char *peek() const { return &*(data_.begin()); }
+  const char *peek() const { return &*(data_.begin() + readIndex_); }
   void retrieve(size_t len);           //调用前需确认可读的大小
   void retrieveUntil(const char *end); //同样需要确认
   void retrieveAll();
@@ -20,6 +20,11 @@ public:
   void append(const string &str); // 向buffer中添加数据,无需确认可写的大小
   void append(const char* data,size_t len);
   size_t readFd(int fd);
+
+  //Debug 用
+  size_t ret_readIndex(){return readIndex_;}
+  size_t ret_writeIndex(){return writeIndex_;}
+  size_t ret_buffersize(){return data_.size();}
 
 private:
   size_t getWriteableBytes() { return data_.size() - writeIndex_; }

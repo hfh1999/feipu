@@ -11,6 +11,9 @@ TcpConnection::TcpConnection(Eventloop *loop, int connfd, InetAddress connAddr)
 }
 TcpConnection::~TcpConnection(){
     socket::closeOrDie(fd_);
+    LOG_TRACE << "TcpConnction: TcpConnection Deleted.";
+    channel_->disableRead();// TcpConnection析构时必须解注册
+    channel_->disableWrite();
 }
 void TcpConnection::NetIntoBuffer() {
   // in_buffer <===== fd_
@@ -18,11 +21,14 @@ void TcpConnection::NetIntoBuffer() {
   if (n == 0) // 断开事件
   {
     assert(close_cb_);
+    LOG_TRACE << "TcpConnection: disconnected.";
     close_cb_(shared_from_this());
   } else { // message事件
-    assert(message_cb_);
-    message_cb_(shared_from_this(),
-                &inBuffer_); // 回调messageCallback,这是从loop中调用的
+    if(message_cb_)
+    {
+      message_cb_(shared_from_this(),
+                  &inBuffer_); // 回调messageCallback,这是从loop中调用的
+    }
   }
 }
 void TcpConnection::send(const char *data, size_t len){

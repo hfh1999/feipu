@@ -12,7 +12,7 @@ void TcpServer::start(){
     acceptor_.start();
 }
 void TcpServer::whenNewConnection(int remoteFd,InetAddress remoteAddr){
-    LOG_INFO << "Recieve Connect.";
+    LOG_INFO << "[TcpServer: "<<name_<<"] New Connection.";
 
     //1. 创建connection对象去管理connection(同时绑定read和write回调)
     // 注意这里通过enable_from_this让所有的share_ptr共用一个引用计数
@@ -32,6 +32,7 @@ void TcpServer::whenNewConnection(int remoteFd,InetAddress remoteAddr){
 
 void TcpServer::whenOldConnDisconnect(TcpConnectionPtr conn){
     // 删除所有权记录即可
+    LOG_INFO << "[TcpServer: "<<name_<<"] Connection Disconnected.";
     size_t n = connections_.count(conn);
     assert(n != 0); // 必然有
     connections_.erase(conn);

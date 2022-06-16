@@ -29,7 +29,7 @@ public:
   }
   void disableRead() {
     events_ &= ~ReadEvent;
-    update_channel();
+    un_register();
   }
   void setWriteCall(WriteCallBack cb) { writecall_ = cb; }
   void enableWrite() {
@@ -39,7 +39,7 @@ public:
   }
   void disableWrite() {
     events_ &= ~WriteEvent;
-    update_channel();
+    un_register();
   }
   void handleEvent() {
     if (revents_ & POLLNVAL) {
@@ -63,7 +63,8 @@ private:
   short revents_;
   Eventloop *loop_;
 
-  void update_channel();
+  void update_channel();// 注册或者更新
+  void un_register();// 解注册
 };
 } // namespace feipu
 #endif

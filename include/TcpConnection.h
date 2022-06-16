@@ -10,7 +10,7 @@
 namespace feipu {
 /*本类应该具有自动化的生命周期管理*/
 /*负责管理缓冲区*/
-class TcpConnection : noncopyable, std::enable_shared_from_this<TcpConnection> {
+class TcpConnection : noncopyable, public std::enable_shared_from_this<TcpConnection> {
 public:
   TcpConnection(Eventloop *loop, int connfd, InetAddress connAddr);
   ~TcpConnection();

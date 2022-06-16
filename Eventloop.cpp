@@ -88,8 +88,10 @@ void Eventloop::updateChannelHelper(Channel *in_channel) {
   in_channel->setIndex(pollfds_.size() - 1);
 }
 void Eventloop::removeChannelHelper(Channel *in_channel) {
+  LOG_TRACE << "RemoveChannel---";
   if (fd_channel_map_.find(in_channel->fd()) == fd_channel_map_.end())
     return;
+  LOG_TRACE << "RemoveChannel+++";
   assert(in_channel == fd_channel_map_[in_channel->fd()]);
   fd_channel_map_.erase(in_channel->fd());
 

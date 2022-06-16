@@ -23,14 +23,17 @@ void Buffer::append(const char *data, size_t len) {
     makeSpace(len);
   }
   std::copy(data, data + len, data_.begin() + writeIndex_);
+  writeIndex_ += len;
 }
 void Buffer::makeSpace(size_t len) {
   //若当前的空间足够，通过前移数据来实现实现makespace
   if (getWriteableBytes() + readIndex_ - DefaultPreSize >= len) {
     std::copy(data_.begin() + readIndex_, data_.begin() + writeIndex_,
               data_.begin() + DefaultPreSize);
+    LOG_TRACE << "makespace move ---: "  << writeIndex_ << "," <<readIndex_;
     writeIndex_ = getReadableBytes() + DefaultPreSize;
     readIndex_ = DefaultPreSize;
+    LOG_TRACE << "makespace move +++: "  << writeIndex_ << "," <<readIndex_;
   } else // 不够的话需要resize;
   {
     data_.resize(writeIndex_ + len);
@@ -48,6 +51,7 @@ size_t Buffer::readFd(int fd) {
     LOG_FATAL << "Buffer: readv error.";
   } else if (n <= static_cast<int>(getWriteableBytes())) {
     writeIndex_ += n;
+    LOG_TRACE << "Buffer: read  " << "n = " << n;
   } else {
     size_t oldWriteable = getWriteableBytes();
     writeIndex_ = data_.size();
