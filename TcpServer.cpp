@@ -12,6 +12,7 @@ void TcpServer::start(){
     acceptor_.start();
 }
 void TcpServer::whenNewConnection(int remoteFd,InetAddress remoteAddr){
+    LOG_TRACE << "[TcpServer] TcpConnection sum = " << connections_.size();
     LOG_INFO << "[TcpServer: "<<name_<<"] New Connection.";
 
     //1. 创建connection对象去管理connection(同时绑定read和write回调)
@@ -35,7 +36,8 @@ void TcpServer::whenOldConnDisconnect(TcpConnectionPtr conn){
     LOG_INFO << "[TcpServer: "<<name_<<"] Connection Disconnected.";
     size_t n = connections_.count(conn);
     assert(n != 0); // 必然有
-    connections_.erase(conn);
+    connections_.erase(conn);//FIXME bug here.
+    /*user call*/
     conn_cb_(conn); // 断开连接时也调用connectCallBack.
 }
 } // namespace feipu

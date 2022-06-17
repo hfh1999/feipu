@@ -19,11 +19,14 @@ public:
   void setCloseCallback(const CloseCallback& cb){close_cb_ = cb;}
   void setWriteCallback(const WriteAllCallback& cb){write_cb_ = cb;}
   void send(const char* data,size_t len);
+  void send(const string& data);
   void connectEstablished();
+
 
 private:
   void NetIntoBuffer(); // 将网络中的数据读入buffer中
   void BufferIntoNet(); // 将buffer的数据写入到网络之中
+  void handleClose();// 当获知连接关闭时
   int fd_;
   InetAddress addr_;
   Eventloop *loop_;

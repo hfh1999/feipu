@@ -51,6 +51,7 @@ void Eventloop::loop() {
     for (auto item : active_channels) {
       item->handleEvent();
     }
+    //LOG_TRACE << "channel size = " << fd_channel_map_.size();
 
     // 处理定时器任务
     timer_queue_->handleTimeEvent();
@@ -73,10 +74,15 @@ void Eventloop::removeChannel(Channel *in_channel) {
 void Eventloop::updateChannelHelper(Channel *in_channel) {
   if (fd_channel_map_.find(in_channel->fd()) != fd_channel_map_.end()) {
     // 找到了，说明是旧channel更新
+    LOG_TRACE << "Eventloop: update channel.";
     assert(fd_channel_map_[in_channel->fd()]->fd() == in_channel->fd());//fd 不可能变动
     struct pollfd tmppoll_fd;
     tmppoll_fd.fd = in_channel->fd();
     tmppoll_fd.events = in_channel->events();
+    if(in_channel->isReading() && in_channel->isWriting())
+    {
+      LOG_TRACE << "Eventloop: update channel,is writing and reading.";
+    }
     pollfds_[fd_channel_map_[in_channel->fd()]->index()] = tmppoll_fd;
     return;
   }
