@@ -1,0 +1,1 @@
+add_executable(s1 share_from_this.cpp)

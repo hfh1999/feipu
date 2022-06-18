@@ -29,7 +29,8 @@ Logger::Logger(const char *file, int line, LoggerLevel level, const char *func)
   basename_ =
       (path_sep_pos == nullptr) ? file : path_sep_pos + 1; // 求文件的basename
   stream_ << TimeStamp::now().toFormattedString() << " "
-          << CurrentThread::get_tid_string() << logLevelStr_[level] << " ";
+          << CurrentThread::get_tid_string() << logLevelStr_[level] << " "
+          << func << ":";
 }
 Logger::~Logger() {
   stream_ << " - " << basename_ << ":" << line_ << '\n';

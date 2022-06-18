@@ -11,7 +11,7 @@ TcpConnection::TcpConnection(Eventloop *loop, int connfd, InetAddress connAddr)
 }
 TcpConnection::~TcpConnection(){
     socket::closeOrDie(fd_);
-    LOG_TRACE << "TcpConnction: TcpConnection Deleted.";
+    LOG_TRACE << "TcpConnection Deleted.";
     channel_->disableRead();// delete?
     channel_->disableWrite();// delete?
     channel_->un_register();// TcpConnection析构时必须解注册
@@ -32,7 +32,6 @@ void TcpConnection::NetIntoBuffer() {
 }
 void TcpConnection::send(const char *data, size_t len){
   // 当outbuffer没有内容时尝试这里直接发送操作
-  int n_write;
   /*
      buffer   sys-buffer
   1. [     ]=>[xxxxx]
@@ -41,9 +40,10 @@ void TcpConnection::send(const char *data, size_t len){
   只有第三种情况才能直接输出
   */
   //TODO 这里的isWriting好好想想
+  int n_write;
   if(outBuffer_.getReadableBytes() == 0 && !channel_->isWriting())
   {
-    LOG_TRACE << "TcpConnection::send: Directly send data.";
+    LOG_TRACE << "Directly send data.";
     n_write = ::write(channel_->fd(),data,len);
     if(n_write < 0)
     {
@@ -51,7 +51,7 @@ void TcpConnection::send(const char *data, size_t len){
     }
     else if(static_cast<size_t>(n_write) <= len)
     {
-      LOG_TRACE << "TcpConnection::send: will send more data.";
+      LOG_TRACE << "will send more data.";
       outBuffer_.append(data + n_write,len - n_write);
       channel_->enableWrite();
     }
@@ -64,26 +64,50 @@ void TcpConnection::send(const char *data, size_t len){
     outBuffer_.append(data,len);
     channel_->enableWrite();
   }
-}
-void TcpConnection::send(const string& data)
-{
-  LOG_TRACE << "appending data";
-  outBuffer_.append(data);
-  channel_->enableWrite();
   if(channel_->isWriting())
   {
     LOG_TRACE << "is Writing.";
   }
 }
+void TcpConnection::send(const string& data)
+{
+  int n_write;
+  if(outBuffer_.getReadableBytes() == 0 && !channel_->isWriting())
+  {
+    LOG_TRACE << "Directly send data.";
+    n_write = ::write(channel_->fd(),data.data(),data.size());
+    if(n_write < 0)
+    {
+      LOG_FATAL << "TcpConnection: Write error.";
+    }
+    else if(static_cast<size_t>(n_write) <= data.size())
+    {
+      LOG_TRACE << "will send more data.";
+      outBuffer_.append(data.data() + n_write,data.size() - n_write);
+      channel_->enableWrite();
+    }
+    else// 全发送完则什么也不做
+    {
+    }
+  }
+  else
+  {
+    outBuffer_.append(data);
+    channel_->enableWrite();
+  }
+  outBuffer_.append(data);
+  channel_->enableWrite();
+}
 void TcpConnection::BufferIntoNet() {
   // out_buffer =====> fd_
   if(channel_->isWriting() == false)
   {
-    LOG_FATAL << "TcpConnection::BufferIntoNet: must be writing.";
+    LOG_TRACE << "Connection has close,return.";
+    return;
   }
   size_t write_n = outBuffer_.getReadableBytes();
   int n = ::write(fd_, outBuffer_.peek(),write_n);
-  LOG_TRACE << "TcpConnection: towrite n = "<< write_n << "write n = " << n;
+  LOG_TRACE << "towrite n = "<< write_n << " ,write n = " << n;
   if(n > 0)
   {
     outBuffer_.retrieve(n);
@@ -104,12 +128,15 @@ void TcpConnection::BufferIntoNet() {
 }
 void TcpConnection::connectEstablished() {
   channel_->enableRead();
+  channel_->tie(shared_from_this());
   conn_cb_(shared_from_this());// FIXME 顺序思考下
 }
 void TcpConnection::handleClose()
 {
     assert(close_cb_);
-    LOG_TRACE << "TcpConnection: disconnected.";
+    LOG_TRACE << "disconnected.";
+    channel_->disableRead();
+    channel_->disableWrite();
     close_cb_(shared_from_this());
 }
 } // namespace feipu

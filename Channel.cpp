@@ -6,6 +6,14 @@ namespace feipu {
 void Channel::update_channel() { loop_->update_channel(this); }
 void Channel::un_register() { loop_->removeChannel(this); }
 void Channel::handleEvent() {
+  std::shared_ptr<void> guard;
+
+  if(is_tied)
+  {
+    assert(!tie_.expired()); // tie_ 应该在这里始终有效
+    guard = tie_.lock();     // 抓住，防止channel的所有者丢失
+  }
+
   if ((revents_ & POLLHUP) && !(revents_ & POLLIN)) { // 不知道有何用
     LOG_WARN << "Channel::handle_event() POLLHUP";
     if (closecall_)
@@ -19,8 +27,13 @@ void Channel::handleEvent() {
   }
   //FIXME 若前面readcall_中发现信道关闭，则会析构TcpConnection.(连通这个channel实例也remove了)
   if (revents_ & POLLOUT) {
-    LOG_TRACE << "eventloop: writecall.";
+    LOG_TRACE << "writecall.";
     writecall_();
   }
+}
+void Channel::tie(std::shared_ptr<void> obj)
+{
+  tie_ = obj;
+  is_tied = true;
 }
 } // namespace feipu

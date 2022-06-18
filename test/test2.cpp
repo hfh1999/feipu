@@ -12,8 +12,6 @@ void whenConnected(TcpConnectionPtr conn) {
   LOG_INFO << "Connected,or Disconncted.";
   //feipu::string message("hello from server.");
   //conn->send(message); // FIXME bug in send.
-  feipu::string message("hello from server.");
-  conn->send(message);// FIXME bug in send.
 }
 void whenRead(TcpConnectionPtr conn, Buffer *buffer) {
   auto n = buffer->getReadableBytes();
@@ -23,6 +21,8 @@ void whenRead(TcpConnectionPtr conn, Buffer *buffer) {
            << "data size = " << buffer->ret_buffersize();
   // LOG_INFO << "That is " << feipu::string(buffer->peek(),n);
   buffer->retrieve(n);
+  feipu::string message("hello from server.");
+  conn->send(message);// FIXME bug in send.
 }
 void whenWriteAll(TcpConnectionPtr conn) { LOG_INFO << "Send ALL"; }
 int main() {

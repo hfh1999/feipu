@@ -54,7 +54,7 @@ class TcpServer:noncopyable
     void start();
     void setConnectionCallback(const ConnectionCallback& cb){conn_cb_ = cb;}
     void setMessageCallback(const MessageCallback& cb){message_cb_ = cb;}
-    void setWriteAllCallback(const WriteAllCallback& cb){}
+    void setWriteAllCallback(const WriteAllCallback& cb){write_cb_ = cb;}
     private:
     void whenNewConnection(int remoteFd,InetAddress remoteAddr);
     void whenOldConnDisconnect(TcpConnectionPtr conn);

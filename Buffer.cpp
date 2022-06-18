@@ -51,7 +51,7 @@ size_t Buffer::readFd(int fd) {
     LOG_FATAL << "Buffer: readv error.";
   } else if (n <= static_cast<int>(getWriteableBytes())) {
     writeIndex_ += n;
-    LOG_TRACE << "Buffer: read  " << "n = " << n;
+    LOG_TRACE <<"n = " << n;
   } else {
     size_t oldWriteable = getWriteableBytes();
     writeIndex_ = data_.size();

@@ -22,7 +22,7 @@ public:
   //fd必须是有效打开状态的
   Channel(int fd, Eventloop *loop)
       : readcall_(), writecall_(), fd_(fd), events_(0), loop_(loop),
-        is_reading_(false), is_writing_(false) {}
+        is_reading_(false), is_writing_(false),is_tied(false) {}
   int fd() { return fd_; }
   int index() { return index_; }
   void setIndex(int index) { index_ = index; }
@@ -62,6 +62,8 @@ public:
   void un_register();// 解注册
   Eventloop *getloop() { return loop_; }
 
+  void tie(std::shared_ptr<void> obj);
+
 private:
   ReadCallBack readcall_;
   WriteCallBack writecall_;
@@ -78,6 +80,7 @@ private:
     channel的拥有者(share_ptr管理) 
   */
   std::weak_ptr<void> tie_;
+  bool is_tied;
 
   void update_channel();// 注册或者更新
 };

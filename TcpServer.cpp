@@ -12,7 +12,7 @@ void TcpServer::start(){
     acceptor_.start();
 }
 void TcpServer::whenNewConnection(int remoteFd,InetAddress remoteAddr){
-    LOG_TRACE << "[TcpServer] TcpConnection sum = " << connections_.size();
+    LOG_TRACE << "TcpConnection sum = " << connections_.size();
     LOG_INFO << "[TcpServer: "<<name_<<"] New Connection.";
 
     //1. 创建connection对象去管理connection(同时绑定read和write回调)

@@ -27,6 +27,7 @@ set(CXX_FLAGS
 string(REPLACE ";" " " CMAKE_CXX_FLAGS "${CXX_FLAGS}")
 set(DUOMU_INCLUDE ${PROJECT_SOURCE_DIR}/include)
 set(TEST_DIR ${PROJECT_SOURCE_DIR}/test)
+set(SNIPPET_DIR ${PROJECT_SOURCE_DIR}/snippet)
 
 set(feipu_SRCS
 Eventloop.cpp
@@ -42,3 +43,4 @@ Buffer.cpp
 include_directories(${DUOMU_INCLUDE})
 add_library(feipu ${feipu_SRCS})
 add_subdirectory(${TEST_DIR})
+add_subdirectory(${SNIPPET_DIR})
