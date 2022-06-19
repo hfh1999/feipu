@@ -22,7 +22,7 @@ void whenRead(TcpConnectionPtr conn, Buffer *buffer) {
   // LOG_INFO << "That is " << feipu::string(buffer->peek(),n);
   buffer->retrieve(n);
   feipu::string message("hello from server.");
-  conn->send(message);// FIXME bug in send.
+  //conn->send(message);// FIXME bug in send.
 }
 void whenWriteAll(TcpConnectionPtr conn) { LOG_INFO << "Send ALL"; }
 int main() {

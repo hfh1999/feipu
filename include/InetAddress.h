@@ -12,6 +12,8 @@ class InetAddress:copyable{
     InetAddress(const struct sockaddr_in& addr);
     InetAddress(const InetAddress&); // copy
     InetAddress& operator=(const InetAddress&); // assign;
+    static InetAddress GetPeerAddr(int fd);
+    static InetAddress GetLocalAddr(int fd);
     const sockaddr_in& getRawSockAddr() const {return *addr_;}
     ~InetAddress();
     private:

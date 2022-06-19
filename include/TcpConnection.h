@@ -10,25 +10,50 @@
 namespace feipu {
 /*本类应该具有自动化的生命周期管理*/
 /*负责管理缓冲区*/
-class TcpConnection : noncopyable, public std::enable_shared_from_this<TcpConnection> {
+/*
+  -------TcpServer's thread_main----|______thread1(tcpconnections' loop)
+                                    |
+                                    |______thread2(tcpconnections' loop)
+                                    |
+                                    |______thread3(tcpconnections' loop)
+
+        ConnectionCallback: accept时threadmain发出，断开由子线程发出
+        MessageCallback: 总是由子线程发出
+        WriteAllCallback: 总是由子线程发出
+
+        ====>
+  从而send调用必须考虑多线程，而buffer的读取由于其总是在子线程中无需考虑多线程。
+*/
+class TcpConnection : noncopyable,
+                      public std::enable_shared_from_this<TcpConnection> {
 public:
-  TcpConnection(Eventloop *loop, int connfd, InetAddress connAddr);
+  TcpConnection(Eventloop *loop, int connfd, InetAddress localaddr,
+                InetAddress peeraddr);
   ~TcpConnection();
   void setMessageCallback(const MessageCallback &cb) { message_cb_ = cb; }
-  void setConnectionCallback(const ConnectionCallback& cb){conn_cb_ = cb;}
-  void setCloseCallback(const CloseCallback& cb){close_cb_ = cb;}
-  void setWriteCallback(const WriteAllCallback& cb){write_cb_ = cb;}
-  void send(const char* data,size_t len);
-  void send(const string& data);
+  void setConnectionCallback(const ConnectionCallback &cb) { conn_cb_ = cb; }
+  void setCloseCallback(const CloseCallback &cb) { close_cb_ = cb; }
+  void setWriteCallback(const WriteAllCallback &cb) { write_cb_ = cb; }
+  void send(const char *data, size_t len); // 线程安全的。
+  void send(const string &data);           //线程安全的
+  Eventloop *getloop() const { return loop_; }
+  const InetAddress & localAddress() { return peeraddr_; }
+  const InetAddress & peerAddress(){return peeraddr_;}
+  bool isConnected() {return true;}
+  void shutdown() {} // 优雅地关闭连接
+
+  /*给TcpServer使用*/
   void connectEstablished();
 
-
 private:
+  void sendInLoop(const char *data, size_t len);
+  // void sendInLoop(const string &data);
   void NetIntoBuffer(); // 将网络中的数据读入buffer中
   void BufferIntoNet(); // 将buffer的数据写入到网络之中
-  void handleClose();// 当获知连接关闭时
+  void handleClose();   // 当获知连接关闭时
   int fd_;
-  InetAddress addr_;
+  InetAddress localaddr_;
+  InetAddress peeraddr_;
   Eventloop *loop_;
   MessageCallback message_cb_;
   ConnectionCallback conn_cb_;

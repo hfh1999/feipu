@@ -17,7 +17,9 @@ void TcpServer::whenNewConnection(int remoteFd,InetAddress remoteAddr){
 
     //1. 创建connection对象去管理connection(同时绑定read和write回调)
     // 注意这里通过enable_from_this让所有的share_ptr共用一个引用计数
-    TcpConnectionPtr newConn(new TcpConnection(loop_,remoteFd,remoteAddr));
+    InetAddress localAddr = InetAddress::GetLocalAddr(remoteFd);
+    TcpConnectionPtr newConn(
+        new TcpConnection(loop_, remoteFd, localAddr, remoteAddr));
     newConn->setConnectionCallback(conn_cb_);
     newConn->setCloseCallback(std::bind(&TcpServer::whenOldConnDisconnect,this,_1));
     newConn->setMessageCallback(message_cb_);

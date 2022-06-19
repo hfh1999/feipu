@@ -2,6 +2,7 @@
 #include <cstring>
 #include "FeiSocketops.h"
 #include <netinet/in.h>
+#include "Logging.h"
 namespace feipu {
 InetAddress::InetAddress(int16_t port)
 :addr_(new sockaddr_in)
@@ -31,4 +32,26 @@ InetAddress& InetAddress::operator=(const InetAddress& rhs)
     return *this;
 }
 InetAddress::~InetAddress(){}
+InetAddress InetAddress::GetPeerAddr(int fd)
+{
+    struct sockaddr_in localaddr;
+    ::bzero(&localaddr, sizeof(localaddr));
+    socklen_t addrlen = sizeof(localaddr);
+    if(::getpeername(fd, reinterpret_cast<struct sockaddr*>(&localaddr),&addrlen) < 0)
+    {
+        LOG_FATAL << "InetAddress:GetPeerAddr() error.";
+    }
+    return InetAddress(localaddr);
+}
+InetAddress InetAddress::GetLocalAddr(int fd)
+{
+    struct sockaddr_in localaddr;
+    ::bzero(&localaddr, sizeof(localaddr));
+    socklen_t addrlen = sizeof(localaddr);
+    if(::getsockname(fd, reinterpret_cast<struct sockaddr*>(&localaddr),&addrlen) < 0)
+    {
+        LOG_FATAL << "InetAddress:GetPeerAddr() error.";
+    }
+    return InetAddress(localaddr);
+}
 }
