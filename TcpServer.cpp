@@ -36,7 +36,7 @@ void TcpServer::whenOldConnDisconnect(TcpConnectionPtr conn){
     LOG_INFO << "[TcpServer: "<<name_<<"] Connection Disconnected.";
     size_t n = connections_.count(conn);
     assert(n != 0); // 必然有
-    connections_.erase(conn);//FIXME bug here.
+    connections_.erase(conn);
     /*user call*/
     conn_cb_(conn); // 断开连接时也调用connectCallBack.
 }

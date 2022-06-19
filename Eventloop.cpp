@@ -5,20 +5,46 @@
 #include "TimerQueue.h"
 #include "Timestamp.h"
 #include <poll.h>
+#include <sys/eventfd.h>
 #include <sys/poll.h>
 const int KPollIntervalMs = 10000; // 使用微秒做单位
 namespace feipu {
 __thread Eventloop *loopInThisThread = 0; // 若线程中已经有了loop则不为0
 Eventloop::Eventloop()
     : looping_(false), timer_queue_(new TimerQueue()),
-      tid_(CurrentThread::get_tid()) {
+      tid_(CurrentThread::get_tid()), wakeupFd_(createEventfd()),
+      wakeChannel_(new Channel(wakeupFd_, this)),
+      isDoFunctions_(false) {
   if (loopInThisThread == 0) {
     loopInThisThread = this;
   } else {
     LOG_FATAL << "Another Eventloop has exist.";
   }
+  wakeChannel_->setReadCall(std::bind(&Eventloop::handleWakeEvent, this));
+  wakeChannel_->enableRead();
 }
-Eventloop::~Eventloop() {}
+int Eventloop::createEventfd() {
+  int evtfd = ::eventfd(0, EFD_NONBLOCK | EFD_CLOEXEC);
+  if (evtfd < 0) {
+    LOG_FATAL << "Failed in ::eventfd()";
+  }
+  return evtfd;
+}
+void Eventloop::handleWakeEvent() {
+  uint64_t one = 1;
+  ssize_t n = ::read(wakeupFd_, &one, sizeof(one));
+  if (n != sizeof(one)) {
+    LOG_ERROR << "EventLoop: wakeup() reads" << n << "bytes instead of 8";
+  }
+}
+void Eventloop::wakeup() {
+  uint64_t one = 1;
+  ssize_t n = ::write(wakeupFd_, &one, sizeof one);
+  if (n != sizeof one) {
+    LOG_ERROR << "EventLoop::wakeup() write " << n << " bytes instead of 8";
+  }
+}
+Eventloop::~Eventloop() { ::close(wakeupFd_); }
 
 void Eventloop::loop() {
   looping_ = true;
@@ -55,6 +81,7 @@ void Eventloop::loop() {
 
     // 处理定时器任务
     timer_queue_->handleTimeEvent();
+    doFunctions();
   }
 }
 void Eventloop::update_channel(Channel *in_channel) {
@@ -65,7 +92,7 @@ void Eventloop::update_channel(Channel *in_channel) {
 }
 void Eventloop::removeChannel(Channel *in_channel) {
   assert(in_channel->getloop() == this);
-  assertInLoopThread();
+  assertInLoopThread(); // 同样
 
   removeChannelHelper(in_channel);
 }
@@ -75,12 +102,12 @@ void Eventloop::updateChannelHelper(Channel *in_channel) {
   if (fd_channel_map_.find(in_channel->fd()) != fd_channel_map_.end()) {
     // 找到了，说明是旧channel更新
     LOG_TRACE << "update channel.";
-    assert(fd_channel_map_[in_channel->fd()]->fd() == in_channel->fd());//fd 不可能变动
+    assert(fd_channel_map_[in_channel->fd()]->fd() ==
+           in_channel->fd()); // fd 不可能变动
     struct pollfd tmppoll_fd;
     tmppoll_fd.fd = in_channel->fd();
     tmppoll_fd.events = in_channel->events();
-    if(in_channel->isReading() && in_channel->isWriting())
-    {
+    if (in_channel->isReading() && in_channel->isWriting()) {
       LOG_TRACE << "update channel,is writing and reading.";
     }
     pollfds_[fd_channel_map_[in_channel->fd()]->index()] = tmppoll_fd;
@@ -93,6 +120,8 @@ void Eventloop::updateChannelHelper(Channel *in_channel) {
   pollfds_.push_back(std::move(tmppoll_fd));
   in_channel->setIndex(pollfds_.size() - 1);
 }
+
+/*重复删除也没问题*/
 void Eventloop::removeChannelHelper(Channel *in_channel) {
   LOG_TRACE << "RemoveChannel---";
   if (fd_channel_map_.find(in_channel->fd()) == fd_channel_map_.end())
@@ -104,6 +133,30 @@ void Eventloop::removeChannelHelper(Channel *in_channel) {
   // 交换最后一个和待删除的一个，然后删除最后一个即可，保证效率
   std::swap(pollfds_[pollfds_.size() - 1], pollfds_[in_channel->index()]);
   pollfds_.erase(pollfds_.end() - 1);
+}
+void Eventloop::runInLoop(const Functor &cb) {
+  if (isInLoopThread()) {
+    cb();
+  } else {
+    {
+      MutexLockGuard guard(mutex_);
+      functions_.push_back(cb);
+
+      wakeup();
+    }
+  }
+}
+void Eventloop::doFunctions() {
+  isDoFunctions_ = true;
+  std::vector<Functor> functors;
+  {
+    MutexLockGuard guard(mutex_);
+    functors.swap(functions_);
+  }
+  for (auto func : functors) {
+    func();
+  }
+  isDoFunctions_ = false;
 }
 void Eventloop::RunEvery(double interval, TimerCallback cb) {
 

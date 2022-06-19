@@ -25,7 +25,6 @@ void Channel::handleEvent() {
   if (revents_ & (POLLIN | POLLPRI | POLLRDHUP)) {
     readcall_();
   }
-  //FIXME 若前面readcall_中发现信道关闭，则会析构TcpConnection.(连通这个channel实例也remove了)
   if (revents_ & POLLOUT) {
     LOG_TRACE << "writecall.";
     writecall_();

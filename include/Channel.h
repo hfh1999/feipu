@@ -50,7 +50,6 @@ public:
   void disableWrite() {
     events_ &= ~WriteEvent;
     is_writing_ = false;
-    //un_register(); // FIXME bug here.
     update_channel();
   }
   void setCloseCall(const CloseCallBack& cb){
