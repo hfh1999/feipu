@@ -1,6 +1,7 @@
 #include "Channel.h"
 #include "EventLoop.h"
 #include "Logging.h"
+#include "Thread.h"
 #include "Timer.h"
 #include <bits/types/__FILE.h>
 #include <cstdio>
@@ -8,15 +9,12 @@
 #include <sys/syscall.h>
 #include <syscall.h>
 #include <unistd.h>
-#include "Thread.h"
-using feipu::Eventloop;
+using feipu::EventLoop;
 using feipu::Logger;
 int fd;
-void test_thread(feipu::Channel* channel)
-{
+void test_thread(feipu::Channel *channel) {
   channel->enableRead();
-  while(true)
-  {
+  while (true) {
   }
 }
 void test_fuc() {
@@ -47,13 +45,13 @@ int main() {
   LOG_TRACE << "trace ???";
   LOG_DEBUG << "debug ???";
   // LOG_FATAL << "to abort";
-  Eventloop myloop;
+  EventLoop myloop;
   myloop.RunEvery(1, time_test);
   myloop.RunEvery(5, time_test2);
   myloop.RunEvery(3, time_test3);
   feipu::Channel mychannel(fd, &myloop);
   feipu::Channel mychannel2(fd, &myloop);
-  feipu::Thread t1(std::bind(test_thread,&mychannel2));
+  feipu::Thread t1(std::bind(test_thread, &mychannel2));
   mychannel.setReadCall(test_fuc);
   mychannel.enableRead();
   myloop.loop();

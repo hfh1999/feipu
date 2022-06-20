@@ -27,7 +27,7 @@ namespace feipu {
 class TcpConnection : noncopyable,
                       public std::enable_shared_from_this<TcpConnection> {
 public:
-  TcpConnection(Eventloop *loop, int connfd, InetAddress localaddr,
+  TcpConnection(EventLoop *loop, int connfd, InetAddress localaddr,
                 InetAddress peeraddr);
   ~TcpConnection();
   void setMessageCallback(const MessageCallback &cb) { message_cb_ = cb; }
@@ -36,7 +36,7 @@ public:
   void setWriteCallback(const WriteAllCallback &cb) { write_cb_ = cb; }
   void send(const char *data, size_t len); // 线程安全的。
   void send(const string &data);           //线程安全的
-  Eventloop *getloop() const { return loop_; }
+  EventLoop *getloop() const { return loop_; }
   const InetAddress &localAddress() { return peeraddr_; }
   const InetAddress &peerAddress() { return peeraddr_; }
   bool isConnected() { return status_ == ConnStatus::Connected; }
@@ -60,7 +60,7 @@ private:
   int fd_;
   InetAddress localaddr_;
   InetAddress peeraddr_;
-  Eventloop *loop_;
+  EventLoop *loop_;
   MessageCallback message_cb_;
   ConnectionCallback conn_cb_;
   CloseCallback close_cb_;

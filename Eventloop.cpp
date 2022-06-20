@@ -11,56 +11,52 @@
 const int KPollIntervalMs = 10000; // 使用微秒做单位
 namespace feipu {
 /*忽略SIGPIPE信号*/
-  class IgnoreSigPipe
-{
- public:
-  IgnoreSigPipe()
-  {
+class IgnoreSigPipe {
+public:
+  IgnoreSigPipe() {
     ::signal(SIGPIPE, SIG_IGN);
     LOG_TRACE << "Ignore SIGPIPE";
   }
 };
 IgnoreSigPipe initobj;
- 
 
-__thread Eventloop *loopInThisThread = 0; // 若线程中已经有了loop则不为0
-Eventloop::Eventloop()
+__thread EventLoop *loopInThisThread = 0; // 若线程中已经有了loop则不为0
+EventLoop::EventLoop()
     : looping_(false), timer_queue_(new TimerQueue()),
       tid_(CurrentThread::get_tid()), wakeupFd_(createEventfd()),
-      wakeChannel_(new Channel(wakeupFd_, this)),
-      isDoFunctions_(false) {
+      wakeChannel_(new Channel(wakeupFd_, this)), isDoFunctions_(false) {
   if (loopInThisThread == 0) {
     loopInThisThread = this;
   } else {
     LOG_FATAL << "Another Eventloop has exist.";
   }
-  wakeChannel_->setReadCall(std::bind(&Eventloop::handleWakeEvent, this));
+  wakeChannel_->setReadCall(std::bind(&EventLoop::handleWakeEvent, this));
   wakeChannel_->enableRead();
 }
-int Eventloop::createEventfd() {
+int EventLoop::createEventfd() {
   int evtfd = ::eventfd(0, EFD_NONBLOCK | EFD_CLOEXEC);
   if (evtfd < 0) {
     LOG_FATAL << "Failed in ::eventfd()";
   }
   return evtfd;
 }
-void Eventloop::handleWakeEvent() {
+void EventLoop::handleWakeEvent() {
   uint64_t one = 1;
   ssize_t n = ::read(wakeupFd_, &one, sizeof(one));
   if (n != sizeof(one)) {
     LOG_ERROR << "EventLoop: wakeup() reads" << n << "bytes instead of 8";
   }
 }
-void Eventloop::wakeup() {
+void EventLoop::wakeup() {
   uint64_t one = 1;
   ssize_t n = ::write(wakeupFd_, &one, sizeof one);
   if (n != sizeof one) {
     LOG_ERROR << "EventLoop::wakeup() write " << n << " bytes instead of 8";
   }
 }
-Eventloop::~Eventloop() { ::close(wakeupFd_); }
+EventLoop::~EventLoop() { ::close(wakeupFd_); }
 
-void Eventloop::loop() {
+void EventLoop::loop() {
   looping_ = true;
   while (looping_) {
     // poll here.
@@ -98,13 +94,13 @@ void Eventloop::loop() {
     doFunctions();
   }
 }
-void Eventloop::update_channel(Channel *in_channel) {
+void EventLoop::update_channel(Channel *in_channel) {
   assert(in_channel->getloop() == this);
   assertInLoopThread(); // 确保这一函数只能在它的io线程内调用
                         // 因为要确保每个channel都是完全属于某个io线程的
   updateChannelHelper(in_channel);
 }
-void Eventloop::removeChannel(Channel *in_channel) {
+void EventLoop::removeChannel(Channel *in_channel) {
   assert(in_channel->getloop() == this);
   assertInLoopThread(); // 同样
 
@@ -112,7 +108,7 @@ void Eventloop::removeChannel(Channel *in_channel) {
 }
 
 /*重复添加是可以的*/
-void Eventloop::updateChannelHelper(Channel *in_channel) {
+void EventLoop::updateChannelHelper(Channel *in_channel) {
   if (fd_channel_map_.find(in_channel->fd()) != fd_channel_map_.end()) {
     // 找到了，说明是旧channel更新
     LOG_TRACE << "update channel.";
@@ -136,7 +132,7 @@ void Eventloop::updateChannelHelper(Channel *in_channel) {
 }
 
 /*重复删除也没问题*/
-void Eventloop::removeChannelHelper(Channel *in_channel) {
+void EventLoop::removeChannelHelper(Channel *in_channel) {
   LOG_TRACE << "RemoveChannel---";
   if (fd_channel_map_.find(in_channel->fd()) == fd_channel_map_.end())
     return;
@@ -148,7 +144,7 @@ void Eventloop::removeChannelHelper(Channel *in_channel) {
   std::swap(pollfds_[pollfds_.size() - 1], pollfds_[in_channel->index()]);
   pollfds_.erase(pollfds_.end() - 1);
 }
-void Eventloop::runInLoop(const Functor &cb) {
+void EventLoop::runInLoop(const Functor &cb) {
   if (isInLoopThread()) {
     cb();
   } else {
@@ -160,7 +156,7 @@ void Eventloop::runInLoop(const Functor &cb) {
     }
   }
 }
-void Eventloop::doFunctions() {
+void EventLoop::doFunctions() {
   isDoFunctions_ = true;
   std::vector<Functor> functors;
   {
@@ -172,16 +168,16 @@ void Eventloop::doFunctions() {
   }
   isDoFunctions_ = false;
 }
-void Eventloop::RunEvery(double interval, TimerCallback cb) {
+void EventLoop::RunEvery(double interval, TimerCallback cb) {
 
   Timer *new_timer =
       new Timer(cb, addTime(TimeStamp::now(), interval), interval);
   timer_queue_->addTimerInLoop(new_timer);
 }
-bool Eventloop::isInLoopThread() const {
+bool EventLoop::isInLoopThread() const {
   return tid_ == CurrentThread::get_tid();
 }
-void Eventloop::assertInLoopThread() {
+void EventLoop::assertInLoopThread() {
   if (!isInLoopThread()) {
     LOG_FATAL << "threadId=" << tid_;
   }

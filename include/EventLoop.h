@@ -14,11 +14,11 @@ using std::map;
 using std::vector;
 class Channel;
 class TimerQueue;
-class Eventloop {
+class EventLoop {
 public:
   typedef std::function<void()> Functor;
-  Eventloop();
-  ~Eventloop();
+  EventLoop();
+  ~EventLoop();
   void loop();                    // 一个循环
   void update_channel(Channel *); // 注册一个回调
   void removeChannel(Channel *);  // 移除一个回调
@@ -43,7 +43,8 @@ private:
   vector<Functor> functions_; // 要执行的fuctions
   int wakeupFd_;
   std::shared_ptr<Channel> wakeChannel_;
-  bool isDoFunctions_; // 在dofunctions()函数中，可能functor仍然会调用run_in_loop,这是为了控制是否要wake的标志
+  bool
+      isDoFunctions_; // 在dofunctions()函数中，可能functor仍然会调用run_in_loop,这是为了控制是否要wake的标志
 
   vector<pollfd> pollfds_; // 每个pollfds对应一个channel
   map<int, Channel *> fd_channel_map_;

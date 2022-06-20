@@ -3,7 +3,7 @@
 #include "Logging.h"
 #include <unistd.h>
 namespace feipu {
-TcpConnection::TcpConnection(Eventloop *loop, int connfd, InetAddress localaddr,
+TcpConnection::TcpConnection(EventLoop *loop, int connfd, InetAddress localaddr,
                              InetAddress peeraddr)
     : fd_(connfd), localaddr_(localaddr), peeraddr_(peeraddr), loop_(loop),
       channel_(new Channel(fd_, loop_)), status_(ConnStatus::Disconnected) {

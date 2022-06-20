@@ -9,14 +9,12 @@ using feipu::Logger;
 using feipu::TcpConnectionPtr;
 using feipu::TcpServer;
 void whenConnected(TcpConnectionPtr conn) {
-  if(conn->isConnected())
-  {
+  if (conn->isConnected()) {
     LOG_INFO << "Connected!!!!";
     feipu::string message("hello from server.");
     conn->send(message);
-    //conn->shutdown();
-  }
-  else {
+    // conn->shutdown();
+  } else {
     LOG_INFO << "Disconnected!!!!";
   }
 }
@@ -34,8 +32,8 @@ void whenRead(TcpConnectionPtr conn, Buffer *buffer) {
 }
 void whenWriteAll(TcpConnectionPtr conn) { LOG_INFO << "Send ALL"; }
 int main() {
-  Logger::setLogLevel(Logger::TRACE);
-  feipu::Eventloop myloop;
+  // Logger::setLogLevel(Logger::TRACE);
+  feipu::EventLoop myloop;
   feipu::TcpServer server(&myloop, feipu::InetAddress(7788), "test_server");
   server.setConnectionCallback(whenConnected);
   server.setMessageCallback(whenRead);
