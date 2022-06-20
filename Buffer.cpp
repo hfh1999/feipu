@@ -39,7 +39,7 @@ void Buffer::makeSpace(size_t len) {
     data_.resize(writeIndex_ + len);
   }
 }
-size_t Buffer::readFd(int fd) {
+ssize_t Buffer::readFd(int fd) {
   char extrabuf[65536];
   struct iovec vec[2];
   vec[0].iov_base = &*(data_.begin() + writeIndex_);
@@ -48,7 +48,7 @@ size_t Buffer::readFd(int fd) {
   vec[1].iov_len = sizeof(extrabuf);
   int n = ::readv(fd, vec, 2);
   if (n < 0) {
-    LOG_FATAL << "Buffer: readv error.";
+    LOG_SYSERROR << "Buffer: readv error.";
   } else if (n <= static_cast<int>(getWriteableBytes())) {
     writeIndex_ += n;
     LOG_TRACE <<"n = " << n;

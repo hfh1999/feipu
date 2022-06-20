@@ -32,6 +32,17 @@ Logger::Logger(const char *file, int line, LoggerLevel level, const char *func)
           << CurrentThread::get_tid_string() << logLevelStr_[level] << " "
           << func << ":";
 }
+Logger::Logger(const char *file, int line, bool toAbort)
+    : stream_(), basename_(), line_(line), level_(toAbort?FATAL:ERROR)
+{
+  const char *path_sep_pos = ::strrchr(file, '/');
+  basename_ =
+      (path_sep_pos == nullptr) ? file : path_sep_pos + 1; // 求文件的basename
+  stream_ << TimeStamp::now().toFormattedString() << " "
+          << CurrentThread::get_tid_string() << logLevelStr_[level_] << " ";
+  const char* prompt_str = strerror(errno);
+  stream_ << prompt_str << " (errno=" << errno << ") ";
+}
 Logger::~Logger() {
   stream_ << " - " << basename_ << ":" << line_ << '\n';
   std::string str = stream_.str();

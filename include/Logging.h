@@ -23,6 +23,7 @@ public:
   typedef std::ostringstream logstream;
   Logger(const char *file, int line, LoggerLevel level);
   Logger(const char *file, int line, LoggerLevel level,const char* func);
+  Logger(const char *file, int line, bool toAbort);
   ~Logger();
   static void setOutput(OutputCall func) { outPutFunc_ = func; }
   logstream& stream(){return stream_;}
@@ -49,5 +50,7 @@ private:
 #define LOG_WARN Logger(__FILE__,__LINE__,Logger::WARN).stream()
 #define LOG_ERROR Logger(__FILE__,__LINE__,Logger::ERROR).stream()
 #define LOG_FATAL Logger(__FILE__,__LINE__,Logger::FATAL).stream()
+#define LOG_SYSFATAL Logger(__FILE__,__LINE__,true).stream()
+#define LOG_SYSERROR Logger(__FILE__,__LINE__,false).stream()
 } // namespace feipu
 #endif

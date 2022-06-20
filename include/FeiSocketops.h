@@ -5,7 +5,7 @@
 #ifndef FEISOCKET_H
 #define FEISOCKET_H
 #include "FeiTypes.h"
-class  sockaddr_in;
+class sockaddr_in;
 namespace feipu {
 namespace socket {
 uint32_t hostToNetwork32(uint32_t);
@@ -14,13 +14,13 @@ uint32_t networkToHost32(uint32_t);
 uint16_t networkToHost16(uint16_t);
 
 int createNonBlockingOrDie(); // 创建一个socket,非阻塞
-int connect(int sockfd,const struct sockaddr_in& addr);
-void bindOrDie(int sockfd,const struct sockaddr_in& addr);
+int connect(int sockfd, const struct sockaddr_in &addr);
+void bindOrDie(int sockfd, const struct sockaddr_in &addr);
 void listenOrDie(int sockfd);
-int accept(int sockfd,struct sockaddr_in* addr);
+int accept(int sockfd, struct sockaddr_in *addr);
 void closeOrDie(int sockfd);
-void shutdownWriteOrDie(int sockfd);
-void fromHostPort(const char* ip,uint16_t port,struct sockaddr_in* addr);
+void shutdownWrite(int sockfd);
+void fromHostPort(const char *ip, uint16_t port, struct sockaddr_in *addr);
 } // namespace socket
 } // namespace feipu
 #endif

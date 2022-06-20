@@ -7,8 +7,22 @@
 #include <poll.h>
 #include <sys/eventfd.h>
 #include <sys/poll.h>
+#include <sys/signal.h>
 const int KPollIntervalMs = 10000; // 使用微秒做单位
 namespace feipu {
+/*忽略SIGPIPE信号*/
+  class IgnoreSigPipe
+{
+ public:
+  IgnoreSigPipe()
+  {
+    ::signal(SIGPIPE, SIG_IGN);
+    LOG_TRACE << "Ignore SIGPIPE";
+  }
+};
+IgnoreSigPipe initobj;
+ 
+
 __thread Eventloop *loopInThisThread = 0; // 若线程中已经有了loop则不为0
 Eventloop::Eventloop()
     : looping_(false), timer_queue_(new TimerQueue()),

@@ -37,20 +37,26 @@ public:
   void send(const char *data, size_t len); // 线程安全的。
   void send(const string &data);           //线程安全的
   Eventloop *getloop() const { return loop_; }
-  const InetAddress & localAddress() { return peeraddr_; }
-  const InetAddress & peerAddress(){return peeraddr_;}
-  bool isConnected() {return true;}
-  void shutdown() {} // 优雅地关闭连接
+  const InetAddress &localAddress() { return peeraddr_; }
+  const InetAddress &peerAddress() { return peeraddr_; }
+  bool isConnected() { return status_ == ConnStatus::Connected; }
+  void shutdown(); // 优雅地关闭连接,线程安全的
 
   /*给TcpServer使用*/
   void connectEstablished();
 
 private:
+  enum ConnStatus {
+    Connected,
+    Disconnected,
+    Disconnecting, // 主动断开则转为这个状态。
+  };
   void sendInLoop(const char *data, size_t len);
   // void sendInLoop(const string &data);
   void NetIntoBuffer(); // 将网络中的数据读入buffer中
   void BufferIntoNet(); // 将buffer的数据写入到网络之中
   void handleClose();   // 当获知连接关闭时
+  void shutInLoop(); //主动关闭连接，但是只是关闭服务器的写端
   int fd_;
   InetAddress localaddr_;
   InetAddress peeraddr_;
@@ -62,6 +68,7 @@ private:
   std::unique_ptr<Channel> channel_;
   Buffer inBuffer_;
   Buffer outBuffer_;
+  ConnStatus status_;
 };
 }; // namespace feipu
 #endif

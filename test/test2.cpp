@@ -9,9 +9,16 @@ using feipu::Logger;
 using feipu::TcpConnectionPtr;
 using feipu::TcpServer;
 void whenConnected(TcpConnectionPtr conn) {
-  LOG_INFO << "Connected,or Disconncted.";
-  //feipu::string message("hello from server.");
-  //conn->send(message); // FIXME bug in send.
+  if(conn->isConnected())
+  {
+    LOG_INFO << "Connected!!!!";
+    feipu::string message("hello from server.");
+    conn->send(message);
+    //conn->shutdown();
+  }
+  else {
+    LOG_INFO << "Disconnected!!!!";
+  }
 }
 void whenRead(TcpConnectionPtr conn, Buffer *buffer) {
   auto n = buffer->getReadableBytes();
@@ -22,7 +29,8 @@ void whenRead(TcpConnectionPtr conn, Buffer *buffer) {
   // LOG_INFO << "That is " << feipu::string(buffer->peek(),n);
   buffer->retrieve(n);
   feipu::string message("hello from server.");
-  //conn->send(message);// FIXME bug in send.
+  conn->send(message);
+  conn->shutdown();
 }
 void whenWriteAll(TcpConnectionPtr conn) { LOG_INFO << "Send ALL"; }
 int main() {
