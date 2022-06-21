@@ -4,6 +4,7 @@
 #include "Channel.h"
 #include "FeiSocketops.h"
 #include "InetAddress.h"
+#include "EventLoopPool.h"
 #include "Logging.h"
 #include "tools.h"
 #include <arpa/inet.h>
@@ -50,6 +51,7 @@ class TcpServer : noncopyable {
 public:
   TcpServer(EventLoop *loop, InetAddress listenAddr, string name);
   void start();
+  void setThreadNum(unsigned short num);
   void setConnectionCallback(const ConnectionCallback &cb) { conn_cb_ = cb; }
   void setMessageCallback(const MessageCallback &cb) { message_cb_ = cb; }
   void setWriteAllCallback(const WriteAllCallback &cb) { write_cb_ = cb; }
@@ -65,6 +67,8 @@ private:
   ConnectionCallback conn_cb_;
   MessageCallback message_cb_;
   WriteAllCallback write_cb_;
+
+  EventLoopPool threads_pool_;
 };
 } // namespace feipu
 #endif

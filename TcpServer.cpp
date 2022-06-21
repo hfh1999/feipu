@@ -5,14 +5,15 @@
 #include "TcpConnection.h"
 namespace feipu {
 TcpServer::TcpServer(EventLoop *loop, InetAddress listenAddr, string name)
-    : loop_(loop), addr_(listenAddr), name_(name), acceptor_(loop, listenAddr) {
-}
+    : loop_(loop), addr_(listenAddr), name_(name), acceptor_(loop, listenAddr),
+      threads_pool_(loop) {}
 void TcpServer::start() {
   LOG_INFO << "[TcpServer:" << name_ << "]"
            << "start.";
   acceptor_.setNewConnectionCallback(
       std::bind(&TcpServer::whenNewConnection, this, _1, _2));
   acceptor_.start();
+  threads_pool_.start();
 }
 void TcpServer::whenNewConnection(int remoteFd, InetAddress remoteAddr) {
   LOG_TRACE << "TcpConnection sum = " << connections_.size();
@@ -21,8 +22,9 @@ void TcpServer::whenNewConnection(int remoteFd, InetAddress remoteAddr) {
   // 1. 创建connection对象去管理connection(同时绑定read和write回调)
   // 注意这里通过enable_from_this让所有的share_ptr共用一个引用计数
   InetAddress localAddr = InetAddress::GetLocalAddr(remoteFd);
+  EventLoop *nextloop = threads_pool_.getNextLoop();
   TcpConnectionPtr newConn(
-      new TcpConnection(loop_, remoteFd, localAddr, remoteAddr));
+      new TcpConnection(nextloop, remoteFd, localAddr, remoteAddr));
   newConn->setConnectionCallback(conn_cb_);
   newConn->setCloseCallback(
       std::bind(&TcpServer::whenOldConnDisconnect, this, _1));
@@ -33,8 +35,8 @@ void TcpServer::whenNewConnection(int remoteFd, InetAddress remoteAddr) {
   connections_.insert(newConn);
 
   // 3. 回调connectionCallback.
-  newConn->connectEstablished(); // 在TcpServer的线程中
-                                 // conn_cb_(newConn); 也可以
+  newConn->getloop()->runInLoop(
+      std::bind(&TcpConnection::connectEstablished, newConn)); // 转移到相应线程运行
 }
 
 void TcpServer::whenOldConnDisconnect(TcpConnectionPtr conn) {
@@ -46,4 +48,5 @@ void TcpServer::whenOldConnDisconnect(TcpConnectionPtr conn) {
   /*user call*/
   conn_cb_(conn); // 断开连接时也调用connectCallBack.
 }
+void TcpServer::setThreadNum(unsigned short num) { threads_pool_.setNum(num); }
 } // namespace feipu

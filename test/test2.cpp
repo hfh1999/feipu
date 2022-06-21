@@ -38,6 +38,7 @@ int main() {
   server.setConnectionCallback(whenConnected);
   server.setMessageCallback(whenRead);
   server.setWriteAllCallback(whenWriteAll);
+  server.setThreadNum(3); // 3 线程用于io
   server.start();
   myloop.loop();
 }
