@@ -22,7 +22,7 @@ IgnoreSigPipe initobj;
 
 __thread EventLoop *loopInThisThread = 0; // 若线程中已经有了loop则不为0
 EventLoop::EventLoop()
-    : looping_(false), timer_queue_(new TimerQueue()),
+    : looping_(false), timer_queue_(new TimerQueue(this)),
       tid_(CurrentThread::get_tid()), wakeupFd_(createEventfd()),
       wakeChannel_(new Channel(wakeupFd_, this)), isDoFunctions_(false) {
   if (loopInThisThread == 0) {
@@ -56,7 +56,16 @@ void EventLoop::wakeup() {
 }
 EventLoop::~EventLoop() { ::close(wakeupFd_); }
 
+void EventLoop::quit()
+{
+  looping_ = false;
+  if(!isInLoopThread())
+  {
+    wakeup();
+  }
+}
 void EventLoop::loop() {
+  assertInLoopThread();
   looping_ = true;
   while (looping_) {
     // poll here.
@@ -168,11 +177,17 @@ void EventLoop::doFunctions() {
   }
   isDoFunctions_ = false;
 }
-void EventLoop::RunEvery(double interval, TimerCallback cb) {
-
-  Timer *new_timer =
-      new Timer(cb, addTime(TimeStamp::now(), interval), interval);
-  timer_queue_->addTimerInLoop(new_timer);
+void EventLoop::RunEvery(double interval, const TimerCallback& cb) {
+  TimeStamp start_time = addTime(TimeStamp::now(),interval);
+  timer_queue_->addTimer(cb, start_time, interval);
+}
+void EventLoop::RunAfter(double delay, const TimerCallback& cb) {
+  TimeStamp start_time = addTime(TimeStamp::now(),delay);
+  timer_queue_->addTimer(cb, start_time, 0.0);
+}
+void EventLoop::RunAt(TimeStamp when, TimerCallback cb)
+{
+  timer_queue_->addTimer(cb, when, 0.0);
 }
 bool EventLoop::isInLoopThread() const {
   return tid_ == CurrentThread::get_tid();

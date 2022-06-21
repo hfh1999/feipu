@@ -13,27 +13,33 @@ namespace feipu{
 class Timer;
 class TimerQueue{
     public:
-        /*int64_t可表示1970年的epoch的上下很多年，完全满足要求*/
-        int64_t getNextTimerTimerOut(){
-            /*第一个要过期的定时器距离过期的时间点的时间,以微秒计数*/
-            TimeStamp nowStamp = TimeStamp::now();
-            now_chache_ = nowStamp;
+      TimerQueue(EventLoop *loop) : loop_(loop) {}
 
-            // 若目前没有定时器任务
-            if(timers_.size() == 0)
-                return -1;  // 永久阻塞
+      /*int64_t可表示1970年的epoch的上下很多年，完全满足要求*/
+      int64_t getNextTimerTimerOut() {
+        /*第一个要过期的定时器距离过期的时间点的时间,以微秒计数*/
+        TimeStamp nowStamp = TimeStamp::now();
+        now_chache_ = nowStamp;
 
-            int64_t timeout;
-            if((timeout = timeDifference(timers_.begin()->first,nowStamp)) <= 0)
-            {
-                return 0;
-            }
-            else {
-                return timeout;
-            }
+        // 若目前没有定时器任务
+        if (timers_.size() == 0)
+          return -1; // 永久阻塞
+
+        int64_t timeout;
+        if ((timeout = timeDifference(timers_.begin()->first, nowStamp)) <= 0) {
+          return 0;
+        } else {
+          return timeout;
+        }
         }
         void addTimerInLoop(Timer* in_timer){
+            loop_->assertInLoopThread();
             insert(in_timer);
+        }
+        void addTimer(const TimerCallback& cb, TimeStamp when, double interval)
+        {
+            Timer * timer = new Timer(cb,when,interval);
+            loop_->runInLoop(std::bind(&TimerQueue::addTimerInLoop,this,timer));
         }
         void handleTimeEvent(){
             vector<Timer*> expired = getExpired();
@@ -84,6 +90,7 @@ class TimerQueue{
         // 仍然暂时采用muduo的set进行管理
         std::set<Entry> timers_;
         TimeStamp now_chache_; // 用来防止在一个循环内多次调用gettimeofday
+        EventLoop* loop_;
 };
 }
 #endif

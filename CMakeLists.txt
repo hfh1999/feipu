@@ -34,12 +34,16 @@ Eventloop.cpp
 Channel.cpp 
 Logging.cpp 
 CurrentThread.cpp 
+Thread.cpp
 FeiSocketops.cpp
 InetAddress.cpp
 TcpServer.cpp
 TcpConnection.cpp
 Buffer.cpp
+EventLoopPool.cpp
+EventLoopThread.cpp
 )
+
 include_directories(${DUOMU_INCLUDE})
 add_library(feipu ${feipu_SRCS})
 add_subdirectory(${TEST_DIR})

@@ -9,6 +9,7 @@
 #include <poll.h>
 #include <sys/poll.h>
 #include <vector>
+#include "Timestamp.h"
 namespace feipu {
 using std::map;
 using std::vector;
@@ -26,9 +27,12 @@ public:
   runInLoop(const Functor &cb); // 将其他线程的函数转移到这个eventloop中执行
 
   // double 的interval的单位为秒
-  void RunEvery(double interval, TimerCallback cb);
+  void RunEvery(double interval, const TimerCallback& cb);// 线程安全的
+  void RunAfter(double delay, const TimerCallback& cb);// 线程安全的
+  void RunAt(TimeStamp when, TimerCallback cb);           // 线程安全的
   bool isInLoopThread() const;
   void assertInLoopThread();
+  void quit(); // 不是线程安全的。
 
 private:
   void updateChannelHelper(Channel *);

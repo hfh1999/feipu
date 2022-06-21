@@ -14,20 +14,36 @@ namespace feipu {
 class Thread : noncopyable {
 public:
   typedef std::function<void()> ThreadFunc;
-  typedef std::thread::id ThreadId;
-  Thread(ThreadFunc func)
-      : thread_(std::bind(&Thread::wrapper, this, func)), tid_(0), mutex_(),
-        cv_() {
+  /*修改错误,不可以将自身this传递给跨线程的对象。*/
+  Thread(ThreadFunc func) : thread_(), func_(func), tid_(0), mutex_(), cv_() {}
+  Thread() : thread_(), func_(), tid_(0), mutex_(), cv_() {}
+  Thread(Thread &&t) noexcept
+      : thread_(std::move(t.thread_)), func_(t.func_), tid_(t.tid_), cv_(),
+        count(t.count) {}
+  Thread& operator=(Thread && rhs) noexcept
+  {
+    if(this != &rhs)
     {
-      {
-        UniqueLock ulock(mutex_);
-        while (count == 0)
-          cv_.wait(ulock);
-      }
+      thread_ = std::move(rhs.thread_);
+      func_ = rhs.func_;
+      tid_ = rhs.tid_;
+      //cv_
+      count = rhs.count;
     }
+    return *this;
   }
 
   pid_t get_tid() { return tid_; }
+  void start(){
+    thread_ = std::thread(&Thread::wrapper,this,func_);
+    {
+      UniqueLock ulock(mutex_);
+      while (count == 0)
+      {
+        cv_.wait(ulock);
+      }
+    }
+  }
   void join();
 
 private:
@@ -42,6 +58,7 @@ private:
     in_func();
   }
   std::thread thread_;
+  ThreadFunc func_;
   pid_t tid_;
   // MutexLock mutex_; // 为了解决调用在初始时调用get_tid为0的问题
   // Condition cv_;    // 同样

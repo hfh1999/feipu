@@ -52,7 +52,9 @@ int main() {
   feipu::Channel mychannel(fd, &myloop);
   feipu::Channel mychannel2(fd, &myloop);
   feipu::Thread t1(std::bind(test_thread, &mychannel2));
+  t1.start();
   mychannel.setReadCall(test_fuc);
   mychannel.enableRead();
   myloop.loop();
+  t1.join();
 }
