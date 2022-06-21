@@ -21,9 +21,10 @@ void EventLoopThread::threadFunc_() {
   }
   {
     // std::unique_lock<std::mutex> guard(mutex_);
-    std::lock_guard<std::mutex> guard(mutex_);
+    //std::lock_guard<std::mutex> guard(mutex_);
+    MutexLockGuard guard(mutex_);
     loop_ = &loop;
-    cv_.notify_one();
+    cv_.notify();
   }
 
   flag = true;
@@ -35,7 +36,7 @@ EventLoop *EventLoopThread::startloop() {
       std::bind(&EventLoopThread::threadFunc_, this)); // 编写了移动赋值运算符
     loopthread_.start();
   {
-    std::unique_lock<std::mutex> guard(mutex_);
+    UniqueLock guard(mutex_);
     while (loop_ == nullptr) 
     {
       cv_.wait(guard);
