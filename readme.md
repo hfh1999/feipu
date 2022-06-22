@@ -8,10 +8,12 @@
 3. 关于日志，目前只完成了一个简单的日志前端，只能在单线程环境下工作，且效率很差.
 4. 已经完成了一个多线程的TcpServer，主要思想是利用One loop per Thread 和 线程池.
 
-### TODO
-1. 目前使用红黑二叉树(std::set)来管理定时器,但计划采用自己编写的heap来替换红黑树.
-2. 计划编写多线程日志，提升效率
-3. 编写多线程的UdpServer
+### TODO(按优先级排列)
+1. 编写HTTP模块             <== working
+2. 编写多线程的UdpServer
+3. 给库提供处理信号的能力
+4. 目前使用红黑二叉树(std::set)来管理定时器,但计划采用优先级队列(堆)替换之
+5. 计划编写多线程日志，提升效率
 
 ### HOW TO USE
 0. 编译准备.
@@ -23,9 +25,10 @@
 ```
     $sh> cmake
 ```
-编译好的库文件是 ${feipu目录}/build/libfeipu.a
+编译好的库文件是 ```${feipu路径}/build/libfeipu.a```
 
 2. power你的项目
 
-在你的项目的MakeLists文件中包含的include/
-链接时要链接libfeipu.a
+在你的项目的MakeLists的包含路径中增加 ```${feipu路径}/include```
+
+最后链接 ```libfeipu.a```
