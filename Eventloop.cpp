@@ -8,6 +8,7 @@
 #include <sys/eventfd.h>
 #include <sys/poll.h>
 #include <sys/signal.h>
+#include "Poller.h"
 const int KPollIntervalMs = 10000; // 使用微秒做单位
 namespace feipu {
 /*忽略SIGPIPE信号*/
@@ -74,29 +75,20 @@ void EventLoop::loop() {
     // 获取最近超时的定时器任务的时间
     int64_t time_out = timer_queue_->getNextTimerTimerOut();
     if (time_out <= -1) {
+      time_out = time_out; // 阻塞
     } else {
-      time_out = time_out / 1000;
+      time_out = time_out; // FIXME 可以去除
     }
 
-    // poll 的计时不准(以ms)考虑更精准的epoll
-    int eventnum = ::poll(&*pollfds_.begin(), pollfds_.size(), time_out);
     vector<Channel *> active_channels;
-    for (auto item : pollfds_) {
-      if (eventnum <= 0)
-        break;
-      if (item.revents > 0) {
-        eventnum -= 1;
-        Channel *channel = fd_channel_map_[item.fd];
-        channel->set_revents(item.revents);
-        active_channels.push_back(fd_channel_map_[item.fd]);
-      }
-    }
+    active_channels = poller_->poll(time_out);
+
 
     // 处理普通的io任务
     for (auto item : active_channels) {
       item->handleEvent();
     }
-    LOG_TRACE << "channel size = " << fd_channel_map_.size();
+    LOG_TRACE << "channel size = " << poller_->debug_ret_map_size();
 
     // 处理定时器任务
     timer_queue_->handleTimeEvent();
@@ -104,54 +96,18 @@ void EventLoop::loop() {
   }
 }
 void EventLoop::update_channel(Channel *in_channel) {
+  /** FIXME 假若这里是在一个事件的处理过程中这里会有什么影响呢?**/
   assert(in_channel->getloop() == this);
   assertInLoopThread(); // 确保这一函数只能在它的io线程内调用
                         // 因为要确保每个channel都是完全属于某个io线程的
-  updateChannelHelper(in_channel);
+  poller_->update_channel(in_channel);
 }
 void EventLoop::removeChannel(Channel *in_channel) {
+  /** FIXME 假若这里是在一个事件的处理过程中这里会有什么影响呢?**/
   assert(in_channel->getloop() == this);
   assertInLoopThread(); // 同样
 
-  removeChannelHelper(in_channel);
-}
-
-/*重复添加是可以的*/
-void EventLoop::updateChannelHelper(Channel *in_channel) {
-  if (fd_channel_map_.find(in_channel->fd()) != fd_channel_map_.end()) {
-    // 找到了，说明是旧channel更新
-    LOG_TRACE << "update channel.";
-    assert(fd_channel_map_[in_channel->fd()]->fd() ==
-           in_channel->fd()); // fd 不可能变动
-    struct pollfd tmppoll_fd;
-    tmppoll_fd.fd = in_channel->fd();
-    tmppoll_fd.events = in_channel->events();
-    if (in_channel->isReading() && in_channel->isWriting()) {
-      LOG_TRACE << "update channel,is writing and reading.";
-    }
-    pollfds_[fd_channel_map_[in_channel->fd()]->index()] = tmppoll_fd;
-    return;
-  }
-  fd_channel_map_[in_channel->fd()] = in_channel;
-  struct pollfd tmppoll_fd;
-  tmppoll_fd.fd = in_channel->fd();
-  tmppoll_fd.events = in_channel->events();
-  pollfds_.push_back(std::move(tmppoll_fd));
-  in_channel->setIndex(pollfds_.size() - 1);
-}
-
-/*重复删除也没问题*/
-void EventLoop::removeChannelHelper(Channel *in_channel) {
-  LOG_TRACE << "RemoveChannel---";
-  if (fd_channel_map_.find(in_channel->fd()) == fd_channel_map_.end())
-    return;
-  LOG_TRACE << "RemoveChannel+++";
-  assert(in_channel == fd_channel_map_[in_channel->fd()]);
-  fd_channel_map_.erase(in_channel->fd());
-
-  // 交换最后一个和待删除的一个，然后删除最后一个即可，保证效率
-  std::swap(pollfds_[pollfds_.size() - 1], pollfds_[in_channel->index()]);
-  pollfds_.erase(pollfds_.end() - 1);
+  poller_->removeChannel(in_channel);
 }
 void EventLoop::runInLoop(const Functor &cb) {
   if (isInLoopThread()) {

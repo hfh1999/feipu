@@ -10,8 +10,11 @@ class Channel;
 class Poller:noncopyable
 {
     public:
-        Poller() = default;
-        std::vector<Channel*> poll();
+        Poller();
+        std::vector<Channel*> poll(int64_t delay);
+        void update_channel(Channel *in_channel);
+        void removeChannel(Channel *channel_removed);
+        size_t debug_ret_map_size();
         
     private:
       std::vector<pollfd> pollfds_;
