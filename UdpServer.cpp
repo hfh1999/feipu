@@ -11,7 +11,7 @@ UdpServer::UdpServer(EventLoop *loop, InetAddress listenAddr, string name)
 }
 UdpServer::~UdpServer() {
   LOG_INFO << "[UdpServer:" << name_ << "]"
-           << "End Server";
+           << "End Server.";
   socket::closeOrDie(fd_);
 }
 void UdpServer::start() {
