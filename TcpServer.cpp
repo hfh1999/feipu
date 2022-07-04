@@ -32,7 +32,7 @@ void TcpServer::whenNewConnection(int remoteFd, InetAddress remoteAddr) {
   newConn->setWriteCallback(write_cb_);
 
   // 2. 所有权记录
-  connections_.insert(newConn);
+  connections_.insert(newConn);//FIXME 应该用fd作键
 
   // 3. 回调connectionCallback.
   newConn->getloop()->runInLoop(

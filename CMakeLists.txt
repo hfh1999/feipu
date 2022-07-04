@@ -42,6 +42,7 @@ TcpConnection.cpp
 Buffer.cpp
 EventLoopPool.cpp
 EventLoopThread.cpp
+UdpServer.cpp
 )
 
 include_directories(${DUOMU_INCLUDE})

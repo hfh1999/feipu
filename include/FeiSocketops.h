@@ -14,6 +14,7 @@ uint32_t networkToHost32(uint32_t);
 uint16_t networkToHost16(uint16_t);
 
 int createNonBlockingOrDie(); // 创建一个socket,非阻塞
+int createUdpOrDie(); // 创建一个udp ，非阻塞
 int connect(int sockfd, const struct sockaddr_in &addr);
 void bindOrDie(int sockfd, const struct sockaddr_in &addr);
 void listenOrDie(int sockfd);

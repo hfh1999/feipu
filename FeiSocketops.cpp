@@ -16,13 +16,36 @@ uint16_t networkToHost16(uint16_t networkshort) {
 int createNonBlockingOrDie() {
   int sockfd = ::socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
   if (sockfd < 0) {
-    LOG_FATAL << "socket: create socket error.";
+    LOG_FATAL << "socket: create tcp socket error.";
   }
 
   // 设置阻塞
   int flags = ::fcntl(sockfd, F_GETFL, 0);
   flags |= O_NONBLOCK;
   int ret = ::fcntl(sockfd, F_SETFL, flags);
+
+  flags = ::fcntl(sockfd, F_GETFD, 0);
+  flags |= FD_CLOEXEC;
+  ret = ::fcntl(sockfd, F_SETFD, flags);
+  if (ret < 0) {
+    LOG_FATAL << "socket: set non-blcokong error.";
+  }
+  return sockfd;
+}
+int createUdpOrDie()
+{
+  int sockfd = ::socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+  if (sockfd < 0) {
+    LOG_FATAL << "socket: create udp socket error.";
+  }
+
+  // 设置阻塞
+  int flags = ::fcntl(sockfd, F_GETFL, 0);
+  flags |= O_NONBLOCK;
+  int ret = ::fcntl(sockfd, F_SETFL, flags);
+  if (ret < 0) {
+    LOG_FATAL << "socket: set non-blcokong error.";
+  }
 
   flags = ::fcntl(sockfd, F_GETFD, 0);
   flags |= FD_CLOEXEC;
