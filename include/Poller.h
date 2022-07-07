@@ -3,6 +3,7 @@
 #include "tools.h"
 #include "FeiTypes.h"
 #include <poll.h>
+#include <sys/epoll.h>
 #include <vector>
 #include <map>
 namespace feipu {
@@ -17,8 +18,10 @@ class Poller:noncopyable
         size_t debug_ret_map_size();
         
     private:
-      std::vector<pollfd> pollfds_;
-      std::map<int,Channel*> fd_channel_map_;
+      const int INIT_EVENTS_NUM = 16;
+      std::map<int,Channel*> fd_channel_map_;// for debug
+      int epollfd_;
+      std::vector<epoll_event> rec_events_;// 动态扩充的数组，方便epoll_wait的返回
 };
 }
 #endif
