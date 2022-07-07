@@ -43,6 +43,7 @@ Buffer.cpp
 EventLoopPool.cpp
 EventLoopThread.cpp
 UdpServer.cpp
+Poller.cpp
 )
 
 include_directories(${DUOMU_INCLUDE})
