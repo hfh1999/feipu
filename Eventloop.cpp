@@ -2,13 +2,13 @@
 #include "Channel.h"
 #include "CurrentThread.h"
 #include "Logging.h"
+#include "Poller.h"
 #include "TimerQueue.h"
 #include "Timestamp.h"
 #include <poll.h>
 #include <sys/eventfd.h>
 #include <sys/poll.h>
 #include <sys/signal.h>
-#include "Poller.h"
 const int KPollIntervalMs = 10000; // 使用微秒做单位
 namespace feipu {
 /*忽略SIGPIPE信号*/
@@ -23,9 +23,10 @@ IgnoreSigPipe initobj;
 
 __thread EventLoop *loopInThisThread = 0; // 若线程中已经有了loop则不为0
 EventLoop::EventLoop()
-    : looping_(false), timer_queue_(new TimerQueue(this)),
-      tid_(CurrentThread::get_tid()), wakeupFd_(createEventfd()),
-      wakeChannel_(new Channel(wakeupFd_, this)), isDoFunctions_(false) {
+    : looping_(false), wakeupFd_(createEventfd()),
+      wakeChannel_(new Channel(wakeupFd_, this)), isDoFunctions_(false),
+      timer_queue_(new TimerQueue(this)), poller_(new Poller()),
+      tid_(CurrentThread::get_tid()) {
   if (loopInThisThread == 0) {
     loopInThisThread = this;
   } else {
@@ -57,11 +58,9 @@ void EventLoop::wakeup() {
 }
 EventLoop::~EventLoop() { ::close(wakeupFd_); }
 
-void EventLoop::quit()
-{
+void EventLoop::quit() {
   looping_ = false;
-  if(!isInLoopThread())
-  {
+  if (!isInLoopThread()) {
     wakeup();
   }
 }
@@ -82,7 +81,6 @@ void EventLoop::loop() {
 
     vector<Channel *> active_channels;
     active_channels = poller_->poll(time_out);
-
 
     // 处理普通的io任务
     for (auto item : active_channels) {
@@ -133,16 +131,15 @@ void EventLoop::doFunctions() {
   }
   isDoFunctions_ = false;
 }
-void EventLoop::RunEvery(double interval, const TimerCallback& cb) {
-  TimeStamp start_time = addTime(TimeStamp::now(),interval);
+void EventLoop::RunEvery(double interval, const TimerCallback &cb) {
+  TimeStamp start_time = addTime(TimeStamp::now(), interval);
   timer_queue_->addTimer(cb, start_time, interval);
 }
-void EventLoop::RunAfter(double delay, const TimerCallback& cb) {
-  TimeStamp start_time = addTime(TimeStamp::now(),delay);
+void EventLoop::RunAfter(double delay, const TimerCallback &cb) {
+  TimeStamp start_time = addTime(TimeStamp::now(), delay);
   timer_queue_->addTimer(cb, start_time, 0.0);
 }
-void EventLoop::RunAt(TimeStamp when, TimerCallback cb)
-{
+void EventLoop::RunAt(TimeStamp when, TimerCallback cb) {
   timer_queue_->addTimer(cb, when, 0.0);
 }
 bool EventLoop::isInLoopThread() const {

@@ -10,6 +10,27 @@ Poller::Poller()
 }
 vector<Channel *> Poller::poll(int64_t delay) {
   int eventnum = ::epoll_wait(epollfd_,&*rec_events_.begin(),rec_events_.size(),delay);
+  int savedErrno = errno;// FIXME 有必要吗
+  if(eventnum == 0)
+  {
+    LOG_TRACE << "Nothing happen.";
+    return vector<Channel*> ();
+  }
+  else if(eventnum < 0)
+  {
+    if(savedErrno != EINTR)
+    {
+      errno = savedErrno;
+      LOG_SYSERROR << "PollPoller::poll()";
+    }
+    return vector<Channel*> ();
+  }
+  // eventnum > 0
+  if(eventnum == static_cast<int>(rec_events_.size()))
+  {
+    // 扩展rec_events防止多次调用epoll
+    rec_events_.resize(2*rec_events_.size());
+  }
   vector<Channel *> active_channels;
   for(int i = 0; i < eventnum;i++)
   {

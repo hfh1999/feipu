@@ -28,7 +28,7 @@ void whenRead(TcpConnectionPtr conn, Buffer *buffer) {
   buffer->retrieve(n);
   feipu::string message("hello from server.");
   conn->send(message);
-  conn->shutdown();
+  //conn->shutdown();
 }
 void whenWriteAll(TcpConnectionPtr conn) { LOG_INFO << "Send ALL"; }
 int main() {

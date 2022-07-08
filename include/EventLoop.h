@@ -51,8 +51,6 @@ private:
   bool
       isDoFunctions_; // 在dofunctions()函数中，可能functor仍然会调用run_in_loop,这是为了控制是否要wake的标志
 
-  //vector<pollfd> pollfds_; // 每个pollfds对应一个channel
-  //map<int, Channel *> fd_channel_map_;
   std::unique_ptr<TimerQueue> timer_queue_;
   std::unique_ptr<Poller> poller_;
 
