@@ -15,6 +15,24 @@
 4. 目前使用红黑二叉树(std::set)来管理定时器,但计划采用优先级队列(堆)替换之
 5. 计划编写多线程日志，提升效率
 
+### http模块原理
+主要思想借鉴了以下几个项目:
+
+[TinyWebServer](https://github.com/qinguoyi/TinyWebServer)
+
+[lib-hv](https://github.com/ithewei/libhv)
+
+[axum](https://github.com/tokio-rs/axum)
+
+```
+HTTP请求 -→ 解析 -→ route -→  |内部表示 in_data|
+                                        |
+                                        |(Http Service Handle)
+                                        |
+                                        ↓
+HTTP回复 ←- 序列化 ←--------- |内部表示out_data|
+```
+
 ### HOW TO USE
 0. 编译准备.
 ```

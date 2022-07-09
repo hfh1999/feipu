@@ -16,6 +16,15 @@ void Buffer::retrieveUntil(const char *end) {
   assert(end >= peek());
   retrieve(end - peek());
 }
+void Buffer::replaceCRCF(size_t index)
+{
+  assert(index+1 < writeIndex_);
+  assert(index >= readIndex_);
+  assert(data_[index] == '\r');
+  assert(data_[index+1] == '\n');
+  data_[index] = '\0';
+  data_[index+1] = '\0';
+}
 void Buffer::append(const string &str) { append(str.data(), str.size()); }
 void Buffer::append(const char *data, size_t len) {
   if (len > getWriteableBytes()) {
