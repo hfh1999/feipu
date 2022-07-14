@@ -2,7 +2,10 @@
 #include "HttpMsg.h"
 namespace feipu {
 Router::Router() {}
-Router &Router::route(const string& path,Routing method_route,HandleFuc) { return *this; }
+Router &Router::route(const string &path, Routing method_route, HandleFuc) {
+  return *this;
+}
+Router &Router::route(const string &path, Service *service) { return *this; }
 HttpMsg* Router::deal(const HttpMsg * in_msg)
 {
     // match HttpMsg and send to hanlefunc
