@@ -1,0 +1,34 @@
+#include "CallBack.h"
+#include "FeiTypes.h"
+#include "InetAddress.h"
+#include "TcpConnection.h"
+#include "tools.h"
+namespace feipu {
+class TcpServer;
+class EventLoop;
+class Router;
+class HttpMsg;
+class HttpHandler;
+class Router;
+class HttpServer : noncopyable {
+public:
+  HttpServer(EventLoop *loop, InetAddress listenAddr, string name);
+  ~HttpServer();
+
+private:
+  /* 绑定到tcpserver的read
+      解析完整的信息后，产生内部表示，然后调用Route
+  */
+  void on_recv(TcpConnectionPtr, Buffer *);
+  void on_connect(TcpConnectionPtr);
+
+  void write_over();          // 发送完毕
+  void serve(Router *in_app); // 注册router
+  void start();
+
+  std::unique_ptr<TcpServer> tcpserver_;
+  // 每个tcp连接对应一个http_handler_;
+  std::map<TcpConnectionPtr,HttpHandler*> handler_map_; // 用智能指针代替之
+  Router *http_router_;
+};
+} // namespace feipu

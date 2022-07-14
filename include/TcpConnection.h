@@ -37,7 +37,7 @@ public:
   void send(const char *data, size_t len); // 线程安全的。
   void send(const string &data);           //线程安全的
   EventLoop *getloop() const { return loop_; }
-  const InetAddress &localAddress() { return peeraddr_; }
+  const InetAddress &localAddress() { return localaddr_; }
   const InetAddress &peerAddress() { return peeraddr_; }
   bool isConnected() { return status_ == ConnStatus::Connected; }
   void shutdown(); // 优雅地关闭连接,线程安全的
