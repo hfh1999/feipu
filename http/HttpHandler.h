@@ -17,7 +17,8 @@ public:
     PARSE_END    // 提前跳出
   };
   ParseStatus parse_http(Buffer *buffer);
-  void handle_http();
+  void handle_http(
+      TcpConnectionPtr conn); // 解析完将中间形式发给router进行处理,然后发送
 
 private:
   enum Method { HEAD, GET, DELETE, PUT, POST, PATCH };
@@ -35,11 +36,8 @@ private:
 
   /* 各种parse*/
   ParseStatus parse_request_line(const char *text, HttpMsg *msg); // 读入字符串
-  ParseStatus parse_headers(const char *text, HttpMsg *msg);// 读入字符串
-  ParseStatus parse_content(const char *data,size_t len, HttpMsg *msg);
-  void response_http(
-      TcpConnectionPtr conn,
-      const HttpMsg *msg); // 解析完将中间形式发给router进行处理,然后发送
+  ParseStatus parse_headers(const char *text, HttpMsg *msg); // 读入字符串
+  ParseStatus parse_content(const char *data, size_t len, HttpMsg *msg);
   Router *router_;
   RequestState check_state_;
   LineStatus line_state_;

@@ -23,7 +23,6 @@ void HttpServer::on_recv(TcpConnectionPtr conn, Buffer *buffer) {
     return;
   }else if(parse_status == HttpHandler::PARSE_NEXT)
   {
-    // 需要更多数据
     LOG_FATAL << "Parse http : INNER ERROR";
   }
 

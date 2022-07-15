@@ -17,7 +17,7 @@ HttpHandler::parse_http(Buffer *buffer) // 利用状态机解析
   while (true) {
     if (check_state_ == CHECK_STATE_CONTENT) // line_state_是否有必要?
     {
-      //body数据无需经过line解析
+      // body数据无需经过line解析
     } else {
       line_state_ = parse_line(buffer);
     }
@@ -59,8 +59,8 @@ HttpHandler::parse_http(Buffer *buffer) // 利用状态机解析
       break;
     }
     case CHECK_STATE_CONTENT: {
-      ParseStatus tmp_parse_state = parse_content(line_text,readable_n,req_);
-      if(tmp_parse_state == PARSE_RECV)
+      ParseStatus tmp_parse_state = parse_content(line_text, readable_n, req_);
+      if (tmp_parse_state == PARSE_RECV)
         return PARSE_RECV; // 需要获取更多的数据
       if (tmp_parse_state == PARSE_ERROR || tmp_parse_state == PARSE_END) {
         return tmp_parse_state; // error,end
@@ -69,7 +69,7 @@ HttpHandler::parse_http(Buffer *buffer) // 利用状态机解析
       break;
     }
     default:
-      return PARSE_ERROR;// 解析错误
+      return PARSE_ERROR; // 解析错误
       break;
     }
   }
@@ -172,21 +172,18 @@ HttpHandler::ParseStatus HttpHandler::parse_headers(const char *text,
 HttpHandler::ParseStatus HttpHandler::parse_content(const char *data,
                                                     size_t len, HttpMsg *msg) {
   // FIXME 应当设置超时,当较长时间没有收到数据会断开连接
-  if(len >= req_->content_lenth)
-  {
-    req_->content_data.append(data,req_->content_lenth);// 复制了
+  if (len >= req_->content_lenth) {
+    req_->content_data.append(data, req_->content_lenth); // 复制了
     return PARSE_END;
-  }
-  else
-  {
+  } else {
     return PARSE_RECV;
   }
 }
-void HttpHandler::response_http(TcpConnectionPtr conn, const HttpMsg *msg) {
+void HttpHandler::handle_http(TcpConnectionPtr conn) {
   if (router_) {
-    HttpMsg *response = router_->deal(msg); // FIXME 使用智能指针
+    router_->deal(req_,respon_); // FIXME 使用智能指针
                                             // FIXME 过大时将不好使
-    string data = response->dump();
+    string data = respon_->dump();
     conn->send(data);
   }
 }

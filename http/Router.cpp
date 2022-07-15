@@ -6,12 +6,17 @@ Router &Router::route(const string &path, Routing method_route, HandleFuc) {
   return *this;
 }
 Router &Router::route(const string &path, Service *service) { return *this; }
-HttpMsg* Router::deal(const HttpMsg * in_msg)
+void Router::deal(HttpMsg * req,HttpMsg * resp)
 {
     // match HttpMsg and send to hanlefunc
-    auto func = match(in_msg->url);
-    HttpMsg* out_msg = new(HttpMsg); // FIXME 使用智能指针
-    func(in_msg,out_msg);
-    return out_msg;
+
+    // 这里进行路径的处理
+    auto func = match(req->url,req); // 还应把标出来的符号存入req
+
+    func(req,resp);
+}
+Router::HandleFuc Router::match(const string&,HttpMsg* req)
+{
+  return HandleFuc();
 }
 } // namespace feipu

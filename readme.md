@@ -33,6 +33,9 @@ HTTP请求 -→ 解析 -→ route -→  |内部表示 in_data|
 HTTP回复 ←- 序列化 ←--------- |内部表示out_data|
 ```
 
+详细用法见:
+[Http模块简介](http/readme.md)
+
 ### HOW TO USE
 0. 编译准备.
 ```
