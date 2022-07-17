@@ -27,7 +27,7 @@
 ```
 HTTP请求 -→ 解析 -→ route -→  |内部表示 in_data|
                                         |
-                                        |(Http Service Handle)
+                                        |(Http Service/Handle)
                                         |
                                         ↓
 HTTP回复 ←- 序列化 ←--------- |内部表示out_data|
