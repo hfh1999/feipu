@@ -1,3 +1,5 @@
+#ifndef httpserver_h
+#define httpserver_h
 #include "CallBack.h"
 #include "FeiTypes.h"
 #include "InetAddress.h"
@@ -32,3 +34,4 @@ private:
   Router *http_router_;
 };
 } // namespace feipu
+#endif

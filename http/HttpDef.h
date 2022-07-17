@@ -1,3 +1,5 @@
+#ifndef HTTPDEF_H
+#define HTTPDEF_H
 /*一些定义，方便进行enum和string的转换，大量使用X宏*/
 #define HTTP_METHOD_MAP(XX)                                                    \
   XX(0, HEAD, "HEAD")                                                          \
@@ -21,3 +23,4 @@ enum HttpMethod http_method_enum(const char *str);
 const char *http_method_str(enum HttpMethod);
 /*判断str是否在枚举中*/
 bool is_http_method_str(const char *str);
+#endif
