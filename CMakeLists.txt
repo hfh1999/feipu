@@ -25,28 +25,16 @@ set(CXX_FLAGS
  -pthread
  )
 string(REPLACE ";" " " CMAKE_CXX_FLAGS "${CXX_FLAGS}")
-set(DUOMU_INCLUDE ${PROJECT_SOURCE_DIR}/include)
+set(FEIPU_BASE_INCLUDE ${PROJECT_SOURCE_DIR}/base/include)
+set(FEIPU_HTTP_INCLUDE ${PROJECT_SOURCE_DIR}/http)
 set(TEST_DIR ${PROJECT_SOURCE_DIR}/test)
 set(SNIPPET_DIR ${PROJECT_SOURCE_DIR}/snippet)
+set(HTTP_DIR ${PROJECT_SOURCE_DIR}/http)
+set(BASE_DIR ${PROJECT_SOURCE_DIR}/base)
 
-set(feipu_SRCS
-Eventloop.cpp
-Channel.cpp 
-Logging.cpp 
-CurrentThread.cpp 
-Thread.cpp
-FeiSocketops.cpp
-InetAddress.cpp
-TcpServer.cpp
-TcpConnection.cpp
-Buffer.cpp
-EventLoopPool.cpp
-EventLoopThread.cpp
-UdpServer.cpp
-Poller.cpp
-)
-
-include_directories(${DUOMU_INCLUDE})
-add_library(feipu ${feipu_SRCS})
+include_directories(${FEIPU_BASE_INCLUDE})
+include_directories(${FEIPU_HTTP_INCLUDE})
 add_subdirectory(${TEST_DIR})
 add_subdirectory(${SNIPPET_DIR})
+add_subdirectory(${HTTP_DIR})
+add_subdirectory(${BASE_DIR})

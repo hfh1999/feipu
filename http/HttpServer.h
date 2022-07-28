@@ -16,6 +16,8 @@ class HttpServer : noncopyable {
 public:
   HttpServer(EventLoop *loop, InetAddress listenAddr, string name);
   ~HttpServer();
+  void start();
+  void serve(Router *in_app); // 注册router
 
 private:
   /* 绑定到tcpserver的read
@@ -25,8 +27,6 @@ private:
   void on_connect(TcpConnectionPtr);
 
   void write_over();          // 发送完毕
-  void serve(Router *in_app); // 注册router
-  void start();
 
   std::unique_ptr<TcpServer> tcpserver_;
   // 每个tcp连接对应一个http_handler_;
