@@ -5,9 +5,10 @@
 #include <list>
 #include <unordered_map>
 namespace feipu {
-class HttpMsg;
+class HttpRequest;
+class HttpResponse;
 class Service;
-typedef std::function<void(const HttpMsg *, HttpMsg *)> HandleFuc;
+typedef std::function<void(const HttpRequest *, HttpResponse *)> HandleFuc;
 struct HttpMethodHandler {
   HttpMethod method;
   HandleFuc handler;
@@ -25,10 +26,10 @@ public:
   Router &route(const string &path, Service *service);
 
   // 内部使用
-  void deal(HttpMsg *req, HttpMsg *resp); // 返回http回复的中间形式
+  void deal(HttpRequest *req, HttpResponse *resp); // 返回http回复的中间形式
 private:
   HttpApiEntries entries_;
-  HandleFuc match(const string &, HttpMsg *req);
+  HandleFuc match(const string &, HttpRequest *req);
   /*需要一个数据结构来记住各种route及handle*/
 };
 } // namespace feipu

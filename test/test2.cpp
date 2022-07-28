@@ -16,6 +16,8 @@ void whenConnected(TcpConnectionPtr conn) {
     // conn->shutdown();
   } else {
     LOG_INFO << "Disconnected!!!!";
+    feipu::string message("hello from server -end.");
+    conn->send(message);
   }
 }
 void whenRead(TcpConnectionPtr conn, Buffer *buffer) {
@@ -24,7 +26,7 @@ void whenRead(TcpConnectionPtr conn, Buffer *buffer) {
   LOG_INFO << "read index = " << buffer->ret_readIndex() << ","
            << "write index = " << buffer->ret_writeIndex() << ","
            << "data size = " << buffer->ret_buffersize();
-  // LOG_INFO << "That is " << feipu::string(buffer->peek(),n);
+  LOG_INFO << "That is " << feipu::string(buffer->peek(),n);
   buffer->retrieve(n);
   feipu::string message("hello from server.");
   conn->send(message);

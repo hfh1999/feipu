@@ -22,15 +22,23 @@ Router &Router::route(const string &path, HttpMethod method_route,
   return *this;
 }
 Router &Router::route(const string &path, Service *service) { return *this; }
-void Router::deal(HttpMsg *req, HttpMsg *resp) {
+void Router::deal(HttpRequest *req, HttpResponse *resp) {
   // match HttpMsg and send to hanlefunc
 
   // 这里进行路径的处理
   auto func = match(req->path, req); // 还应把标出来的符号存入req
 
-  func(req, resp);
+  if(func)
+  {
+    func(req, resp);
+  }
+  else
+  {
+    // 找不到，未实现
+    resp->status_code = HTTP_STATUS_NOT_IMPLEMENTED;
+  }
 }
-HandleFuc Router::match(const string &, HttpMsg *req) {
+HandleFuc Router::match(const string &, HttpRequest *req) {
   /*进行path和method匹配，匹配上了则执行相应的HandleFuc*/
   const char *s = req->path.c_str();
   const char *e = req->path.c_str();

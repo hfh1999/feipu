@@ -29,7 +29,7 @@ void HttpServer::on_recv(TcpConnectionPtr conn, Buffer *buffer) {
   // END 解析完成
 
   // PARSE_END,解析完成,进行处理
-  handler->handle_http();
+  handler->handle_http(conn);
 }
 void HttpServer::on_connect(TcpConnectionPtr conn)
 {

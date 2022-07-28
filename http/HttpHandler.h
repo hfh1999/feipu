@@ -4,6 +4,8 @@
 namespace feipu {
 class Buffer;
 class HttpMsg;
+class HttpRequest;
+class HttpResponse;
 class Router;
 /*注意这个类不是线程安全的*/
 class HttpHandler {
@@ -35,15 +37,15 @@ private:
   size_t line_end_index_; // 只是方便获取一行末尾的位置而已
 
   /* 各种parse*/
-  ParseStatus parse_request_line(const char *text, HttpMsg *msg); // 读入字符串
-  ParseStatus parse_headers(const char *text, HttpMsg *msg); // 读入字符串
-  ParseStatus parse_content(const char *data, size_t len, HttpMsg *msg);
+  ParseStatus parse_request_line(const char *text, HttpRequest *msg); // 读入字符串
+  ParseStatus parse_headers(const char *text, HttpRequest *msg); // 读入字符串
+  ParseStatus parse_content(const char *data, size_t len, HttpRequest *msg);
   Router *router_;
   RequestState check_state_;
   LineStatus line_state_;
   size_t line_index_; // 记住当前分析的行分析到哪了
-  HttpMsg *req_;      // 解析后的http信息
-  HttpMsg *respon_;   // 构造后的http信息
+  HttpRequest *req_;      // 解析后的http信息
+  HttpResponse *respon_;   // 构造后的http信息
 };
 } // namespace feipu
 #endif

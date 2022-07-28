@@ -8,8 +8,8 @@
 namespace feipu {
 HttpHandler::HttpHandler()
     : router_(nullptr), check_state_(CHECK_STATE_REQUESTLINE),
-      line_state_(LINE_OPEN), line_index_(0), req_(new HttpMsg),
-      respon_(new HttpMsg) {}
+      line_state_(LINE_OPEN), line_index_(0), req_(new HttpRequest),
+      respon_(new HttpResponse) {}
 HttpHandler::ParseStatus
 HttpHandler::parse_http(Buffer *buffer) // 利用状态机解析
 {
@@ -107,7 +107,7 @@ HttpHandler::LineStatus HttpHandler::parse_line(Buffer *buffer) {
 }
 
 HttpHandler::ParseStatus HttpHandler::parse_request_line(const char *text,
-                                                         HttpMsg *msg) {
+                                                         HttpRequest *msg) {
   int start_index = 0;
 
   int index = start_index;
@@ -143,7 +143,7 @@ HttpHandler::ParseStatus HttpHandler::parse_request_line(const char *text,
   return PARSE_NEXT;
 }
 HttpHandler::ParseStatus HttpHandler::parse_headers(const char *text,
-                                                    HttpMsg *msg) {
+                                                    HttpRequest *msg) {
   if (text[0] == '\0') {
     if (req_->content_lenth != 0) {
       return PARSE_NEXT;
@@ -170,7 +170,7 @@ HttpHandler::ParseStatus HttpHandler::parse_headers(const char *text,
   return PARSE_RECV;
 }
 HttpHandler::ParseStatus HttpHandler::parse_content(const char *data,
-                                                    size_t len, HttpMsg *msg) {
+                                                    size_t len, HttpRequest *msg) {
   // FIXME 应当设置超时,当较长时间没有收到数据会断开连接
   if (len >= req_->content_lenth) {
     req_->content_data.append(data, req_->content_lenth); // 复制了
@@ -183,7 +183,7 @@ void HttpHandler::handle_http(TcpConnectionPtr conn) {
   if (router_) {
     router_->deal(req_,respon_); // FIXME 使用智能指针
                                             // FIXME 过大时将不好使
-    string data = respon_->dump();
+    string data = respon_->Dump(true, true); // 序列化respon_
     conn->send(data);
   }
 }
