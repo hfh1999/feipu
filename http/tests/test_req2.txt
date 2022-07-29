@@ -1,0 +1,18 @@
+POST /mcp/pc/pcsearch HTTP/1.1
+Accept: */*
+Accept-Encoding: gzip, deflate, br
+Accept-Language: zh-CN,zh;q=0.9,en;q=0.8
+Connection: keep-alive
+Content-Length: 56
+Content-Type: application/json
+Cookie: BIDUPSID=A536918D82AD1EC0FC209F8EA93789D5; PSTM=1592421492; BDUSS=lRWmtzcmh1WWdiekRyaEtTaWItd1RoTlVhRXdhYnJlZW1UUHFEZ1dwelZLV2xnRVFBQUFBJCQAAAAAAAAAAAEAAADtsKY~aGZoMjAwMDYAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAANWcQWDVnEFgLX; BDUSS_BFESS=lRWmtzcmh1WWdiekRyaEtTaWItd1RoTlVhRXdhYnJlZW1UUHFEZ1dwelZLV2xnRVFBQUFBJCQAAAAAAAAAAAEAAADtsKY~aGZoMjAwMDYAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAANWcQWDVnEFgLX; __yjs_duid=1_613e8c545151ba510c006820822733c01619340511739; BAIDUID=DEF26BFDFB232E166164B1D5B1DE43A7:SL=0:NR=10:FG=1; ZFY=WxqW8hsEjesDY:AHXktb:Aek3vNbMC65Fr6wN6:AMqPWMo:C; BA_HECTOR=0h2h2g80ahag2h2g8h0ik1bu1he4im316; BDRCVFR[feWj1Vr5u3D]=I67x6TjHwwYf0; delPer=0; PSINO=3; H_PS_PSSID=36547_36625_36721_36413_36954_36950_36166_36807_36740_26350_36863_36939_36651; BDORZ=B490B5EBF6F3CD402E515D22BCDA1598
+Host: ug.baidu.com
+Origin: https://www.baidu.com
+Referer: https://www.baidu.com/s?wd=hello&rsv_spt=1&rsv_iqid=0xdf984d9f00216f8b&issp=1&f=8&rsv_bp=1&rsv_idx=2&ie=utf-8&tn=baiduhome_pg&rsv_enter=1&rsv_dl=tb&rsv_sug3=6&rsv_sug1=2&rsv_sug7=100&rsv_sug2=0&rsv_btype=i&inputT=5910&rsv_sug4=7368
+Sec-Fetch-Dest: empty
+Sec-Fetch-Mode: cors
+Sec-Fetch-Site: same-site
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36
+sec-ch-ua: ".Not/A)Brand";v="99", "Google Chrome";v="103", "Chromium";v="103"
+sec-ch-ua-mobile: ?0
+sec-ch-ua-platform: "Windows"

@@ -5,6 +5,7 @@
 #include "TcpConnection.h"
 #include <cstring>
 #include <strings.h>
+#include "Logging.h"
 namespace feipu {
 HttpHandler::HttpHandler()
     : router_(nullptr), check_state_(CHECK_STATE_REQUESTLINE),
@@ -29,7 +30,7 @@ HttpHandler::parse_http(Buffer *buffer) // 利用状态机解析
     if (line_state_ == LINE_OPEN) {
       return PARSE_RECV; // buffer无需前进因为这一行需要更多数据,向conection取
     }
-
+    LOG_TRACE << "Get One Line.";
     const char *line_text = buffer->peek();
     size_t readable_n = buffer->getReadableBytes();
     // LINE_OK
