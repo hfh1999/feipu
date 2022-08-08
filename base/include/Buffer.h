@@ -16,7 +16,7 @@ public:
   void retrieve(size_t len);           //调用前需确认可读的大小
   void retrieveUntil(const char *end); //同样需要确认
   void retrieveAll();
-  void replaceCRCF(size_t index); // 将index处的\r\n转换为\0\0
+  void replaceCRCF(size_t index); // 将index处(以readindex_为0)的\r\n转换为\0\0
 
   void append(const string &str); // 向buffer中添加数据,无需确认可写的大小
   void append(const char* data,size_t len);

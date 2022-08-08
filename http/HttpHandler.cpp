@@ -30,7 +30,7 @@ HttpHandler::parse_http(Buffer *buffer) // 利用状态机解析
     if (line_state_ == LINE_OPEN) {
       return PARSE_RECV; // buffer无需前进因为这一行需要更多数据,向conection取
     }
-    LOG_TRACE << "Get One Line.";
+    LOG_TRACE << "Get One Line:" << buffer->peek();
     const char *line_text = buffer->peek();
     size_t readable_n = buffer->getReadableBytes();
     // LINE_OK
@@ -49,10 +49,12 @@ HttpHandler::parse_http(Buffer *buffer) // 利用状态机解析
     }
     case CHECK_STATE_HEADER: {
       ParseStatus tmp_parse_state = parse_headers(line_text, req_);
-      if (PARSE_RECV == tmp_parse_state) // 需要更多数据,向缓存取,状态不变
+      if (PARSE_RECV == tmp_parse_state) // 需要更多的行
+      {
+        buffer->retrieve(line_index_); // 后面这几种情况都无需buffer的前一行数据了
+        line_index_ = 0;
         continue;
-      buffer->retrieve(line_index_); // 后面这几种情况都无需buffer的前一行数据了
-      line_index_ = 0;
+      }
       if (tmp_parse_state == PARSE_ERROR || tmp_parse_state == PARSE_END) {
         return tmp_parse_state; // error,end
       }
@@ -84,7 +86,7 @@ HttpHandler::LineStatus HttpHandler::parse_line(Buffer *buffer) {
   for (; line_index_ < bufsize; line_index_++) {
     tmp = *(buffer->peek() + line_index_);
     if (tmp == '\r') {
-      if (line_index_ == bufsize) {
+      if (line_index_ + 1 == bufsize) {
         return LINE_OPEN;
       } else if (*(buffer->peek() + line_index_ + 1) == '\n') {
         buffer->replaceCRCF(line_index_);

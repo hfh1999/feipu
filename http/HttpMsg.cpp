@@ -1,7 +1,7 @@
 #include "HttpMsg.h"
 namespace feipu {
 bool HttpMsg::setVersion(const string &version_str) {
-  if (version == "HTTP/1.1") // 只支持1.1
+  if (version_str == "HTTP/1.1") // 只支持1.1
   {
     version = version_str;
     return true;
