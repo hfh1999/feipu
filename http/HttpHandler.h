@@ -21,6 +21,10 @@ public:
   ParseStatus parse_http(Buffer *buffer);
   void handle_http(
       TcpConnectionPtr conn); // 解析完将中间形式发给router进行处理,然后发送
+  
+  /*调试用*/
+  HttpRequest* ret_request() {return req_;}
+  HttpResponse* ret_response() {return respon_;}
 
 private:
   enum Method { HEAD, GET, DELETE, PUT, POST, PATCH };
