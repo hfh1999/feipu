@@ -26,10 +26,9 @@ void HttpServer::on_recv(TcpConnectionPtr conn, Buffer *buffer) {
     LOG_FATAL << "Parse http : INNER ERROR";
   }
 
-  // END 解析完成
-
   // PARSE_END,解析完成,进行处理
   handler->handle_http(conn);
+  conn->shutdown();
 }
 void HttpServer::on_connect(TcpConnectionPtr conn)
 {

@@ -30,6 +30,7 @@ void Router::deal(HttpRequest *req, HttpResponse *resp) {
 
   if(func)
   {
+    LOG_TRACE << "req->path: => exec func ";
     func(req, resp);
   }
   else

@@ -20,6 +20,8 @@ struct HttpMsg {
   string content_data;
   size_t content_lenth;
   bool setVersion(const string &version_str);
+  void setContent(const string& in_data);// 同时会设置content_lenth.
+  void setContent(const char* in_data,size_t len);
   // header
   void DumpHeaders(string& in_str);
   void DumpBody(string& in_str);

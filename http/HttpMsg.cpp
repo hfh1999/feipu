@@ -21,6 +21,15 @@ bool HttpRequest::setMethod(const string &method_str) {
     return true;
   }
 }
+void HttpMsg::setContent(const string& in_data)
+{
+  setContent(in_data.data(),in_data.size());
+}
+void HttpMsg::setContent(const char* in_data,size_t len)
+{
+  content_data.append(in_data,len);
+  headers["Content-length"] = std::to_string(len);
+}
 void HttpMsg::DumpHeaders(string &in_str) {
   string tmp_str;
   for(auto header:headers)
@@ -66,7 +75,6 @@ string HttpRequest::Dump(bool is_dump_headers, bool is_dump_body)
 }
 string HttpResponse::Dump(bool is_dump_headers, bool is_dump_body)
 {
-  HttpMsg::Dump(true, true);
   string str;
   str.append(string_format("HTTP/1.1 %d %s\r\n",status_code,http_status_str(status_code)));
   str += HttpMsg::Dump(is_dump_headers,is_dump_body);

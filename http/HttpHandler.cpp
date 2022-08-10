@@ -66,6 +66,8 @@ HttpHandler::parse_http(Buffer *buffer) // 利用状态机解析
       return tmp_parse_state; // error,end
     }
     case CHECK_STATE_CONTENT: {
+      // FIXME 应当设置超时,当较长时间没有收到数据会断开连接
+      // FIXME 接收大量的content可能会有一些问题
       ParseStatus tmp_parse_state = parse_content(line_text, readable_n, req_);
       if (tmp_parse_state == PARSE_RECV) {
         return PARSE_RECV;
@@ -192,7 +194,6 @@ HttpHandler::ParseStatus HttpHandler::parse_headers(const char *text,
 }
 HttpHandler::ParseStatus
 HttpHandler::parse_content(const char *data, size_t len, HttpRequest *msg) {
-  // FIXME 应当设置超时,当较长时间没有收到数据会断开连接
   if (len >= req_->content_lenth) {
     req_->content_data.append(data, req_->content_lenth); // 复制了
     return PARSE_END;
@@ -205,7 +206,10 @@ void HttpHandler::handle_http(TcpConnectionPtr conn) {
     router_->deal(req_, respon_);            // FIXME 使用智能指针
                                              // FIXME 过大时将不好使
     string data = respon_->Dump(true, true); // 序列化respon_
-    conn->send(data);
+    conn->send(data);                        // FIXME copy here.
+  }
+  else
+  {
   }
 }
 } // namespace feipu
