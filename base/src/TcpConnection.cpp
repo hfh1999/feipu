@@ -3,10 +3,11 @@
 #include "Logging.h"
 #include <unistd.h>
 namespace feipu {
-TcpConnection::TcpConnection(EventLoop *loop, int connfd, InetAddress localaddr,
+TcpConnection::TcpConnection(EventLoop *loop, string name,int connfd, InetAddress localaddr,
                              InetAddress peeraddr)
     : fd_(connfd), localaddr_(localaddr), peeraddr_(peeraddr), loop_(loop),
-      channel_(new Channel(fd_, loop_)), status_(ConnStatus::Disconnected) {
+      channel_(new Channel(fd_, loop_)), status_(ConnStatus::Disconnected),
+      conn_name_(name) {
   channel_->setReadCall(std::bind(&TcpConnection::NetIntoBuffer, this));
   channel_->setWriteCall(std::bind(&TcpConnection::BufferIntoNet, this));
 }
@@ -155,7 +156,10 @@ void TcpConnection::connectEstablished() {
   channel_->enableRead();
   channel_->tie(shared_from_this());
   status_ = ConnStatus::Connected;
-  conn_cb_(shared_from_this()); // FIXME 顺序思考下
+  if(conn_cb_)
+  {
+    conn_cb_(shared_from_this()); // FIXME 顺序思考下
+  }
 }
 void TcpConnection::handleClose() {
   assert(close_cb_);

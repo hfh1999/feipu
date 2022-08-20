@@ -2,7 +2,7 @@
 #include "FeiSocketops.h"
 #include "Logging.h"
 #include <cstring>
-#include <netinet/in.h>
+#include <arpa/inet.h>
 namespace feipu {
 InetAddress::InetAddress(int16_t port) : addr_(new sockaddr_in) {
   ::bzero(addr_.get(), sizeof(*addr_));
@@ -61,6 +61,20 @@ InetAddress InetAddress::GetLocalAddr(int fd) {
     LOG_FATAL << "InetAddress:GetPeerAddr() error.";
   }
   return InetAddress(localaddr);
+}
+string InetAddress::toIpPort() const
+{
+  char buf[64] = "";
+  const sockaddr_in* tmp = addr_.get();
+  socket::toIpPort(buf, sizeof(buf),reinterpret_cast<const sockaddr*>(tmp));
+  return buf;
+}
+string InetAddress::toIp() const
+{
+  char buf[64] = "";
+  const sockaddr_in* tmp = addr_.get();
+  socket::toIp(buf, sizeof(buf),reinterpret_cast<const sockaddr*>(tmp));
+  return buf;
 }
 bool InetAddressComp::operator()(const InetAddress &lhs,
                                  const InetAddress &rhs) {

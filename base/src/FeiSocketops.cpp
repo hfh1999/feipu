@@ -4,6 +4,9 @@
 #include <fcntl.h>
 #include <sys/socket.h>
 #include <unistd.h>
+#include <cassert>
+#include <cstdio>
+#include <cstring>
 namespace feipu {
 namespace socket {
 uint32_t hostToNetwork32(uint32_t hostlong) { return ::htonl(hostlong); }
@@ -97,6 +100,30 @@ void fromHostPort(const char *ip, uint16_t port, struct sockaddr_in *addr) {
   if (inet_pton(AF_INET, ip, &addr->sin_addr) <= 0) {
     LOG_FATAL << "sockets: inet_pton error.";
   }
+}
+void toIp(char* buf,size_t size,const struct sockaddr* addr)
+{
+  if (addr->sa_family == AF_INET)
+  {
+    assert(size >= INET_ADDRSTRLEN);
+    const struct sockaddr_in* addr4 = reinterpret_cast<const struct sockaddr_in*>(addr);
+    ::inet_ntop(AF_INET, &addr4->sin_addr, buf, static_cast<socklen_t>(size));
+  }
+  else if (addr->sa_family == AF_INET6)
+  {
+    assert(size >= INET6_ADDRSTRLEN);
+    const struct sockaddr_in6* addr6 = reinterpret_cast<const struct sockaddr_in6*>(addr);
+    ::inet_ntop(AF_INET6, &addr6->sin6_addr, buf, static_cast<socklen_t>(size));
+  }
+}
+void toIpPort(char* buf,size_t size,const struct sockaddr* addr)
+{
+  toIp(buf,size, addr);
+  size_t end = ::strlen(buf);
+  const struct sockaddr_in* addr4 = reinterpret_cast<const struct sockaddr_in*>(addr);
+  uint16_t port = networkToHost16(addr4->sin_port);
+  assert(size > end);
+  snprintf(buf+end, size-end, ":%u", port);
 }
 } // namespace socket
 

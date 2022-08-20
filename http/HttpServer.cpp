@@ -9,9 +9,13 @@ HttpServer::HttpServer(EventLoop *loop, InetAddress listenAddr, string name)
     : tcpserver_(new TcpServer(loop, listenAddr, name)), http_router_(nullptr) {}
 HttpServer::~HttpServer() {}
 void HttpServer::start() {
+  tcpserver_->setConnectionCallback(std::bind(&HttpServer::on_connect,this,_1));
   tcpserver_->setMessageCallback(std::bind(&HttpServer::on_recv, this, _1, _2));
+  //tcpserver_->setThreadNum(1);
+  tcpserver_->start();
 }
 void HttpServer::on_recv(TcpConnectionPtr conn, Buffer *buffer) {
+  LOG_TRACE << "conn = [" << conn->getName() << "]" << " recieved.";
   assert(handler_map_.find(conn) != handler_map_.end());
   HttpHandler* handler =  handler_map_[conn];
   HttpHandler::ParseStatus parse_status = handler->parse_http(buffer);
@@ -26,6 +30,9 @@ void HttpServer::on_recv(TcpConnectionPtr conn, Buffer *buffer) {
     LOG_FATAL << "Parse http : INNER ERROR";
   }
 
+  LOG_INFO << "headers count = "<<handler->ret_request()->headers.size();
+  LOG_INFO << "Web Req's conn is " << conn->getName();
+  LOG_INFO << handler->ret_request()->Dump(true, true);
   // PARSE_END,解析完成,进行处理
   handler->handle_http(conn);
   conn->shutdown();

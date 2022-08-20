@@ -27,7 +27,7 @@ namespace feipu {
 class TcpConnection : noncopyable,
                       public std::enable_shared_from_this<TcpConnection> {
 public:
-  TcpConnection(EventLoop *loop, int connfd, InetAddress localaddr,
+  TcpConnection(EventLoop *loop,string name,int connfd, InetAddress localaddr,
                 InetAddress peeraddr);
   ~TcpConnection();
   void setMessageCallback(const MessageCallback &cb) { message_cb_ = cb; }
@@ -40,6 +40,7 @@ public:
   const InetAddress &localAddress() { return localaddr_; }
   const InetAddress &peerAddress() { return peeraddr_; }
   bool isConnected() { return status_ == ConnStatus::Connected; }
+  string getName(){return conn_name_;}
   void shutdown(); // 优雅地关闭连接,线程安全的
 
   /*给TcpServer使用*/
@@ -69,6 +70,7 @@ private:
   Buffer inBuffer_;
   Buffer outBuffer_;
   ConnStatus status_;
+  string conn_name_;
 };
 }; // namespace feipu
 #endif

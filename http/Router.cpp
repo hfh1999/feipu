@@ -7,7 +7,7 @@ Router &Router::route(const string &path, HttpMethod method_route,
                       HandleFuc handler) {
   // todo 需要检查通配符
   std::shared_ptr<HttpMethodHandlers> handlers_ptr;
-  if (entries_.find(path) != entries_.end()) {
+  if (entries_.find(path) == entries_.end()) {
     handlers_ptr = std::make_shared<HttpMethodHandlers>();
   } else {
     handlers_ptr = entries_[path];
@@ -19,6 +19,7 @@ Router &Router::route(const string &path, HttpMethod method_route,
     }
   }
   handlers_ptr->push_back(HttpMethodHandler(method_route, handler));
+  entries_[path] = handlers_ptr;
   return *this;
 }
 Router &Router::route(const string &path, Service *service) { return *this; }
@@ -27,19 +28,20 @@ void Router::deal(HttpRequest *req, HttpResponse *resp) {
 
   // 这里进行路径的处理
   auto func = match(req->path, req); // 还应把标出来的符号存入req
-
+  LOG_INFO << "match: " << req->path ;
   if(func)
   {
-    LOG_TRACE << "req->path: => exec func ";
+    LOG_INFO << "req->path: => exec func ";
     func(req, resp);
   }
   else
   {
     // 找不到，未实现
+    LOG_TRACE << "Not Implement.";
     resp->status_code = HTTP_STATUS_NOT_IMPLEMENTED;
   }
 }
-HandleFuc Router::match(const string &, HttpRequest *req) {
+HandleFuc Router::match(const string & in_path, HttpRequest *req) {
   /*进行path和method匹配，匹配上了则执行相应的HandleFuc*/
   const char *s = req->path.c_str();
   const char *e = req->path.c_str();

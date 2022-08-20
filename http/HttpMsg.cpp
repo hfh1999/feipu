@@ -31,10 +31,9 @@ void HttpMsg::setContent(const char* in_data,size_t len)
   headers["Content-length"] = std::to_string(len);
 }
 void HttpMsg::DumpHeaders(string &in_str) {
-  string tmp_str;
   for(auto header:headers)
   {
-    tmp_str.append(header.first + ":" + " " + header.second + "\r\n");
+    in_str.append(header.first + ":" + " " + header.second + "\r\n");
   }
 }
 void HttpMsg::DumpBody(string &in_str) {

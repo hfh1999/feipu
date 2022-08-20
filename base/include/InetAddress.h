@@ -16,6 +16,8 @@ class InetAddress:copyable{
     static InetAddress GetPeerAddr(int fd);
     static InetAddress GetLocalAddr(int fd);
     const sockaddr_in& getRawSockAddr() const {return *addr_;}
+    string toIpPort() const;
+    string toIp() const;
     bool is_valid(){
         if(addr_.get() == nullptr)
         {

@@ -25,7 +25,7 @@ public:
   void update_channel(Channel *); // 注册一个回调
   void removeChannel(Channel *);  // 移除一个回调
   void
-  runInLoop(const Functor &cb); // 将其他线程的函数转移到这个eventloop中执行
+  runInLoop(Functor cb); // 将其他线程的函数转移到这个eventloop中执行
 
   // double 的interval的单位为秒
   void RunEvery(double interval, const TimerCallback& cb);// 线程安全的

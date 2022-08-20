@@ -62,6 +62,7 @@ private:
   EventLoop *loop_;
   InetAddress addr_;
   string name_;
+  int nextConnId_;
   Acceptor acceptor_;
   std::set<TcpConnectionPtr> connections_; // 对connection有拥有权
   ConnectionCallback conn_cb_;

@@ -107,7 +107,7 @@ void EventLoop::removeChannel(Channel *in_channel) {
 
   poller_->removeChannel(in_channel);
 }
-void EventLoop::runInLoop(const Functor &cb) {
+void EventLoop::runInLoop(Functor cb) {
   if (isInLoopThread()) {
     cb();
   } else {

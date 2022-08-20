@@ -12,7 +12,7 @@ public:
   typedef std::function<void(EventLoop *)> ThreadInitCallback;
   EventLoopPool(EventLoop *loop);
   ~EventLoopPool();//FIXME 由于EventloopThread的原因EventLoopPool不可以销毁太快，否则卡死
-  void setNum(unsigned short loop_num);
+  void setNum(unsigned short loop_num);  // 需要额外的子线程数目
   void start(const ThreadInitCallback& cb = ThreadInitCallback());
   EventLoop *getNextLoop();
 
