@@ -38,7 +38,7 @@ void HttpServer::on_recv(TcpConnectionPtr conn, Buffer *buffer) {
 
   //LOG_INFO << handler->ret_request()->Dump(true, true);
   // PARSE_END,解析完成,进行处理
-  LOG_INFO << "[HttpServer::on_recv] parse finish - header count = "
+  LOG_TRACE << "[HttpServer::on_recv] parse finish - header count = "
            << handler->ret_request()->headers.size() << "- Web Req's conn is "
            << conn->getName();
   handler->handle_http(conn);
@@ -76,35 +76,6 @@ void HttpServer::on_connect(TcpConnectionPtr conn) {
   }
   //loop_->runInLoop(std::bind(&HttpServer::loop_on_connect, this, conn));
   //loop_on_connect(conn);
-}
-void HttpServer::loop_on_connect(TcpConnectionPtr conn) {
-  loop_->assertInLoopThread();
-  if (conn->isConnected()) {
-    LOG_INFO << "[HttpServer::new Connection] " << conn->getName();
-    if (handler_map_.find(conn) == handler_map_.end()) {
-      LOG_INFO << "[HttpServer] new in map.";
-      handler_map_[conn] =
-          new HttpHandler; // FIXME 是否会引起conn增加引用计数？
-      handler_map_[conn]->init(http_router_);
-      for (auto item : handler_map_) {
-        LOG_INFO << "handler_map_ : " << item.first->getName();
-      }
-    } else {
-      LOG_INFO << "conn is existing.";
-    }
-  } else {
-    LOG_INFO << "[HttpServer: disconnect]" << conn->getName();
-    for (auto item : handler_map_) {
-      LOG_INFO << "handler_map_ : " << item.first->getName();
-    }
-    if (handler_map_.find(conn) != handler_map_.end()) {
-      auto to_delete = handler_map_[conn];
-      delete (to_delete);
-      handler_map_.erase(conn);
-    } else {
-      LOG_FATAL << "handler's conn not exist!";
-    }
-  }
 }
 void HttpServer::serve(Router *in_app) { http_router_ = in_app; }
 } // namespace feipu

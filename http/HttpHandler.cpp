@@ -32,7 +32,9 @@ HttpHandler::parse_http(Buffer *buffer) // 利用状态机解析
       return PARSE_RECV; // buffer无需前进因为这一行需要更多数据,向conection取
     }
     if(check_state_ != CHECK_STATE_CONTENT)
+    {
       LOG_TRACE << "Get One Line:" << buffer->peek();
+    }
     const char *line_text = buffer->peek();
     size_t readable_n = buffer->getReadableBytes();
     // LINE_OK

@@ -20,7 +20,7 @@ int main(int argc, char *args[]) {
   HttpHandler my_handler;
   char tmp_buffer[128];
   char path[256];
-  getcwd(path, 256);
+  auto ret = getcwd(path, 256);
   cout << "PWD = " << path << endl;
   FILE *file_ptr = fopen(filename, "r");
   if (file_ptr == nullptr) {
