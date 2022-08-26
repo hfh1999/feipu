@@ -3,20 +3,21 @@
 #include "Logging.h"
 #include <unistd.h>
 namespace feipu {
-TcpConnection::TcpConnection(EventLoop *loop, string name,int connfd, InetAddress localaddr,
-                             InetAddress peeraddr)
+TcpConnection::TcpConnection(EventLoop *loop, string name, int connfd,
+                             InetAddress localaddr, InetAddress peeraddr)
     : fd_(connfd), localaddr_(localaddr), peeraddr_(peeraddr), loop_(loop),
       channel_(new Channel(fd_, loop_)), status_(ConnStatus::Disconnected),
       conn_name_(name) {
   channel_->setReadCall(std::bind(&TcpConnection::NetIntoBuffer, this));
   channel_->setWriteCall(std::bind(&TcpConnection::BufferIntoNet, this));
+  channel_->setCloseCall(std::bind(&TcpConnection::handleClose, this));
 }
 TcpConnection::~TcpConnection() {
   socket::closeOrDie(fd_);
-  LOG_TRACE << "TcpConnection Deleted.";
-  channel_->disableRead();  // delete?
-  channel_->disableWrite(); // delete?
-  channel_->un_register();  // TcpConnection析构时必须解注册
+  LOG_TRACE << "TcpConnection: "<<getName()<<" Deleted.";
+  //channel_->disableRead();  // delete?
+  //channel_->disableWrite(); // delete?
+  // ? channel_->un_register();  // TcpConnection析构时必须解注册
                            // FIXME 考虑在close事件刚发生时就进行解注册
 }
 void TcpConnection::NetIntoBuffer() {
@@ -153,20 +154,36 @@ void TcpConnection::BufferIntoNet() {
   }
 }
 void TcpConnection::connectEstablished() {
-  channel_->enableRead();
+  loop_->assertInLoopThread();
   channel_->tie(shared_from_this());
   status_ = ConnStatus::Connected;
-  if(conn_cb_)
-  {
+  channel_->enableRead();
+  LOG_TRACE << "TcpConnection: EnableRead!";
+  if (conn_cb_) {
+    LOG_TRACE << "TcpConnection: exec conn_cb!";
     conn_cb_(shared_from_this()); // FIXME 顺序思考下
   }
 }
+void TcpConnection::connectDestory() {
+  loop_->assertInLoopThread();
+  channel_->un_register();
+}
 void TcpConnection::handleClose() {
+  loop_->assertInLoopThread();
   assert(close_cb_);
-  LOG_TRACE << "disconnected.";
+  if(status_ == Disconnected)
+  {
+    LOG_FATAL << "Try to disconnect multipy times. conn = " << getName() << " read = " << channel_->isReading();
+    return;
+  }
+
+  LOG_TRACE << "do the disconnecting.";
   status_ = ConnStatus::Disconnected;
-  channel_->disableRead();
-  channel_->disableWrite();
+  channel_->disableAll();
+  if (conn_cb_) {
+    /*user call*/
+    conn_cb_(shared_from_this());
+  }
   close_cb_(shared_from_this()); // 回调tcpServer中的销毁过程
 }
 void TcpConnection::shutdown() {

@@ -33,6 +33,8 @@ public:
   void RunAt(TimeStamp when, TimerCallback cb);           // 线程安全的
   bool isInLoopThread() const;
   void assertInLoopThread();
+  pid_t getTid();
+  size_t queueSize();
   void quit(); // 不是线程安全的。
 
 private:

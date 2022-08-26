@@ -45,13 +45,22 @@ void TcpServer::whenNewConnection(int remoteFd, InetAddress remoteAddr) {
 }
 
 void TcpServer::whenOldConnDisconnect(TcpConnectionPtr conn) {
-  // 删除所有权记录即可
+  LOG_TRACE << "[TcpServer::whenOldConnDisconnect] conn = " << conn->getName() << " fd = " << conn->getFd();
+  // bug: 实际没有运行removeConnection,导致Disconnect多次
+  loop_->runInLoop(std::bind(&TcpServer::removeConnection,this,conn));
+}
+void TcpServer::removeConnection(TcpConnectionPtr conn)
+{
+  loop_->assertInLoopThread();
   LOG_INFO << "TcpServer::whenOldConnDisconnect [" << name_ << "] Connection [" << conn->getName()<< "] Disconnected.";
   size_t n = connections_.count(conn);
   assert(n != 0); // 必然有
   connections_.erase(conn);
-  /*user call*/
-  conn_cb_(conn); // 断开连接时也调用connectCallBack.
+  LOG_TRACE << "TcpServer::whenOldConnDisconnect [" << name_ << "] connction count = " << connections_.size();
+
+  // 从connections 移除connection所有权后,需要真正的移除connection(移除channel的注册)
+  EventLoop * ioloop = conn->getloop();
+  ioloop->runInLoop(std::bind(&TcpConnection::connectDestory,conn));
 }
 void TcpServer::setThreadNum(unsigned short num) { threads_pool_.setNum(num); }
 } // namespace feipu

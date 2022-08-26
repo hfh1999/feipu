@@ -114,12 +114,16 @@ void EventLoop::runInLoop(Functor cb) {
     {
       MutexLockGuard guard(mutex_);
       functions_.push_back(cb);
+      LOG_TRACE << "tid = " << getTid()
+               << " pending size = " << functions_.size();
+    }
 
       wakeup();
-    }
   }
 }
 void EventLoop::doFunctions() {
+  assertInLoopThread();
+  LOG_TRACE << "do functions!:size = " << functions_.size();
   isDoFunctions_ = true;
   std::vector<Functor> functors;
   {
@@ -127,7 +131,7 @@ void EventLoop::doFunctions() {
     functors.swap(functions_);
   }
   for (auto func : functors) {
-    func();
+    func();//WARN 可能在这里进行runInloop操作
   }
   isDoFunctions_ = false;
 }
@@ -149,5 +153,10 @@ void EventLoop::assertInLoopThread() {
   if (!isInLoopThread()) {
     LOG_FATAL << "threadId=" << tid_;
   }
+}
+pid_t EventLoop::getTid() { return tid_; }
+size_t EventLoop::queueSize() {
+  MutexLockGuard lock(mutex_);
+  return functions_.size();
 }
 } // namespace feipu

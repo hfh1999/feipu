@@ -41,10 +41,12 @@ public:
   const InetAddress &peerAddress() { return peeraddr_; }
   bool isConnected() { return status_ == ConnStatus::Connected; }
   string getName(){return conn_name_;}
+  int getFd(){return fd_;}
   void shutdown(); // 优雅地关闭连接,线程安全的
 
   /*给TcpServer使用*/
   void connectEstablished();
+  void connectDestory();
 
 private:
   enum ConnStatus {

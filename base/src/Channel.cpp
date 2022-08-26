@@ -3,6 +3,9 @@
 #include "Logging.h"
 namespace feipu {
 
+Channel::Channel(int fd, EventLoop *loop)
+    : readcall_(), writecall_(), fd_(fd), events_(0),revents_(0), loop_(loop),
+      is_reading_(false), is_writing_(false), is_tied(false) {}
 void Channel::update_channel() { loop_->update_channel(this); }
 void Channel::un_register() { loop_->removeChannel(this); }
 void Channel::handleEvent() {
@@ -15,9 +18,11 @@ void Channel::handleEvent() {
   }
 
   if ((revents_ & POLLHUP) && !(revents_ & POLLIN)) { // 不知道有何用
-    LOG_WARN << "Channel::handle_event() POLLHUP";
+    LOG_WARN << "fd = " << fd_<<" Channel::handle_event() POLLHUP";
     if (closecall_)
+    {
       closecall_();
+    }
   }
   if (revents_ & POLLNVAL) {
     LOG_WARN << "fd is invalid.";

@@ -20,12 +20,18 @@ public:
   typedef function<void(void)> CloseCallBack;
 
   // fd必须是有效打开状态的
-  Channel(int fd, EventLoop *loop)
-      : readcall_(), writecall_(), fd_(fd), events_(0), loop_(loop),
-        is_reading_(false), is_writing_(false), is_tied(false) {}
+  Channel(int fd, EventLoop *loop);
   int fd() { return fd_; }
   int index() { return index_; }
   void setIndex(int index) { index_ = index; }
+  // 建议使用disableAll() 而不是disableRead + disableWrite,因为其会额外错误
+  void disableAll(){
+    events_ = NoneEvent;
+    is_reading_ = false;
+    is_writing_ = false;
+    update_channel();
+  }
+  bool isNoneEvent(){return events_ == NoneEvent;}
   void setReadCall(const ReadCallBack &cb) { readcall_ = cb; }
   void enableRead() {
     assert(readcall_);

@@ -28,10 +28,10 @@ void Router::deal(HttpRequest *req, HttpResponse *resp) {
 
   // 这里进行路径的处理
   auto func = match(req->path, req); // 还应把标出来的符号存入req
-  LOG_INFO << "match: " << req->path ;
+  LOG_TRACE << "match: " << req->path ;
   if(func)
   {
-    LOG_INFO << "req->path: => exec func ";
+    LOG_TRACE << "req->path: => exec func ";
     func(req, resp);
   }
   else

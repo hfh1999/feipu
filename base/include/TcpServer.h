@@ -59,12 +59,14 @@ public:
 private:
   void whenNewConnection(int remoteFd, InetAddress remoteAddr);
   void whenOldConnDisconnect(TcpConnectionPtr conn);
+  void removeConnection(TcpConnectionPtr conn);
   EventLoop *loop_;
   InetAddress addr_;
   string name_;
   int nextConnId_;
   Acceptor acceptor_;
   std::set<TcpConnectionPtr> connections_; // 对connection有拥有权
+  // FIXME 这里使用TcpConnectionPtr 作为key是否会导致不唯一?
   ConnectionCallback conn_cb_;
   MessageCallback message_cb_;
   WriteAllCallback write_cb_;

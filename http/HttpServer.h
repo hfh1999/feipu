@@ -17,6 +17,7 @@ public:
   HttpServer(EventLoop *loop, InetAddress listenAddr, string name);
   ~HttpServer();
   void start();
+  void setThreadNum(unsigned short num); // 设定线程数
   void serve(Router *in_app); // 注册router
 
 private:
@@ -25,13 +26,16 @@ private:
   */
   void on_recv(TcpConnectionPtr, Buffer *);
   void on_connect(TcpConnectionPtr);
+  void loop_on_connect(TcpConnectionPtr);
 
   void write_over();          // 发送完毕
 
   std::unique_ptr<TcpServer> tcpserver_;
   // 每个tcp连接对应一个http_handler_;
   std::map<TcpConnectionPtr,HttpHandler*> handler_map_; // 用智能指针代替之
+  MutexLock mutex_;
   Router *http_router_;
+  EventLoop* loop_;
 };
 } // namespace feipu
 #endif
