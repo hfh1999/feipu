@@ -23,8 +23,8 @@ public:
       TcpConnectionPtr conn); // 解析完将中间形式发给router进行处理,然后发送
   
   /*调试用*/
-  HttpRequest* ret_request() {return req_;}
-  HttpResponse* ret_response() {return respon_;}
+  HttpRequest* ret_request() {return req_.get();}
+  HttpResponse* ret_response() {return respon_.get();}
 
 private:
   enum Method { HEAD, GET, DELETE, PUT, POST, PATCH };
@@ -48,8 +48,8 @@ private:
   RequestState check_state_;
   LineStatus line_state_;
   size_t line_index_; // 记住当前分析的行分析到哪了
-  HttpRequest *req_;      // 解析后的http信息
-  HttpResponse *respon_;   // 构造后的http信息
+  std::shared_ptr<HttpRequest> req_;      // 解析后的http信息
+  std::shared_ptr<HttpResponse> respon_;   // 构造后的http信息
 };
 } // namespace feipu
 #endif

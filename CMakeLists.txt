@@ -4,8 +4,8 @@ project(feipu CXX)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CXX_FLAGS
- #-g
- -O2
+ -g
+ #-O2
  # -DVALGRIND
  # -DMUDUO_STD_STRING
  #-Wall
@@ -25,6 +25,7 @@ set(CXX_FLAGS
  -rdynamic
  -pthread
  )
+find_package(Boost REQUIRED)
 string(REPLACE ";" " " CMAKE_CXX_FLAGS "${CXX_FLAGS}")
 set(FEIPU_BASE_INCLUDE ${PROJECT_SOURCE_DIR}/base/include)
 set(FEIPU_HTTP_INCLUDE ${PROJECT_SOURCE_DIR}/http)
@@ -32,9 +33,9 @@ set(TEST_DIR ${PROJECT_SOURCE_DIR}/test)
 set(SNIPPET_DIR ${PROJECT_SOURCE_DIR}/snippet)
 set(HTTP_DIR ${PROJECT_SOURCE_DIR}/http)
 set(BASE_DIR ${PROJECT_SOURCE_DIR}/base)
-
 include_directories(${FEIPU_BASE_INCLUDE})
 include_directories(${FEIPU_HTTP_INCLUDE})
+include_directories(${Boost_INCLUDE_DIRS})
 add_subdirectory(${TEST_DIR})
 add_subdirectory(${SNIPPET_DIR})
 add_subdirectory(${HTTP_DIR})

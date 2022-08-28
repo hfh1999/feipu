@@ -9,7 +9,7 @@ int main() {
   // Logger::setLogLevel(Logger::LoggerLevel::TRACE);
   EventLoop loop;
   HttpServer myweb(&loop, InetAddress(8989), "test_web");
-  // myweb.setThreadNum(3);
+  myweb.setThreadNum(6);
   Router my_service;
   my_service.route(
       "/index.html", HttpMethod::HTTP_GET,

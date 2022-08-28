@@ -7,6 +7,7 @@
 #include "FeiTypes.h"
 #include "InetAddress.h"
 #include "tools.h"
+#include <boost/any.hpp>
 namespace feipu {
 /*本类应该具有自动化的生命周期管理*/
 /*负责管理缓冲区*/
@@ -43,6 +44,8 @@ public:
   string getName(){return conn_name_;}
   int getFd(){return fd_;}
   void shutdown(); // 优雅地关闭连接,线程安全的
+  void setContext(const boost::any& context){context_ = context;}
+  boost::any* getContext(){return &context_;}
 
   /*给TcpServer使用*/
   void connectEstablished();
@@ -73,6 +76,7 @@ private:
   Buffer outBuffer_;
   ConnStatus status_;
   string conn_name_;
+  boost::any context_; // 方便httpServer进行无锁的内容查询
 };
 }; // namespace feipu
 #endif

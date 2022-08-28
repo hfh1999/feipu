@@ -40,7 +40,7 @@ HttpHandler::parse_http(Buffer *buffer) // 利用状态机解析
     // LINE_OK
     switch (check_state_) {
     case CHECK_STATE_REQUESTLINE: {
-      ParseStatus tmp_parse_state = parse_request_line(line_text, req_);
+      ParseStatus tmp_parse_state = parse_request_line(line_text, req_.get());
       // parse_request_line 只有NEXT状态和ERROR状态
       buffer->retrieve(line_index_); //后面都无需buffer的缓存了
       line_index_ = 0;
@@ -51,7 +51,7 @@ HttpHandler::parse_http(Buffer *buffer) // 利用状态机解析
       break;
     }
     case CHECK_STATE_HEADER: {
-      ParseStatus tmp_parse_state = parse_headers(line_text, req_);
+      ParseStatus tmp_parse_state = parse_headers(line_text, req_.get());
 
       // 后面这几种情况都无需buffer的前一行数据了
       buffer->retrieve(line_index_);
@@ -70,7 +70,7 @@ HttpHandler::parse_http(Buffer *buffer) // 利用状态机解析
     case CHECK_STATE_CONTENT: {
       // FIXME 应当设置超时,当较长时间没有收到数据会断开连接
       // FIXME 接收大量的content可能会有一些问题
-      ParseStatus tmp_parse_state = parse_content(line_text, readable_n, req_);
+      ParseStatus tmp_parse_state = parse_content(line_text, readable_n, req_.get());
       if (tmp_parse_state == PARSE_RECV) {
         return PARSE_RECV;
       }
@@ -205,7 +205,7 @@ HttpHandler::parse_content(const char *data, size_t len, HttpRequest *msg) {
 }
 void HttpHandler::handle_http(TcpConnectionPtr conn) {
   if (router_) {
-    router_->deal(req_, respon_);            // FIXME 使用智能指针
+    router_->deal(req_.get(), respon_.get());            // FIXME 使用智能指针
                                              // FIXME 过大时将不好使
     string data = respon_->Dump(true, true); // 序列化respon_
     conn->send(data);                        // FIXME copy here.

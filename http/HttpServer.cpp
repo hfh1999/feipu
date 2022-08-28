@@ -21,10 +21,11 @@ void HttpServer::setThreadNum(unsigned short num) {
 void HttpServer::on_recv(TcpConnectionPtr conn, Buffer *buffer) {
   LOG_TRACE << "conn = [" << conn->getName() << "]"
             << " recieved.";
-  mutex_.lock();
-  assert(handler_map_.find(conn) != handler_map_.end());
-  HttpHandler *handler = handler_map_[conn];
-  mutex_.unlock();
+  HttpHandler* handler = boost::any_cast<HttpHandler>(conn->getContext());
+  //mutex_.lock();
+  //assert(handler_map_.find(conn) != handler_map_.end());
+  //HttpHandler *handler = handler_map_[conn];
+  //mutex_.unlock();
   HttpHandler::ParseStatus parse_status = handler->parse_http(buffer);
   if (parse_status == HttpHandler::PARSE_ERROR) {
     // 解析错误,中断连接
@@ -45,34 +46,24 @@ void HttpServer::on_recv(TcpConnectionPtr conn, Buffer *buffer) {
   conn->shutdown();
 }
 void HttpServer::on_connect(TcpConnectionPtr conn) {
-  LOG_INFO << "connected status = " << conn->isConnected()
-           << " thread id = " << conn->getloop()->getTid() << " HttpServer id = " << loop_->getTid();
+  //LOG_INFO << "connected status = " << conn->isConnected()
+  //         << " thread id = " << conn->getloop()->getTid() << " HttpServer id = " << loop_->getTid();
   if (conn->isConnected()) {
-    mutex_.lock();
-    if (handler_map_.find(conn) == handler_map_.end()) {
-      handler_map_[conn] =
-          new HttpHandler; // FIXME 是否会引起conn增加引用计数？
-      handler_map_[conn]->init(http_router_);
-      //for (auto item : handler_map_) {
-      //  LOG_INFO << "handler_map_ : " << item.first->getName();
-      //}
-    } else {
-      LOG_TRACE << "conn is existing.";
-    }
-    mutex_.unlock();
-  } else {
-    mutex_.lock();
-    //for (auto item : handler_map_) {
-    //  LOG_INFO << "handler_map_ : " << item.first->getName();
+    conn->setContext(HttpHandler());
+    HttpHandler* handler = boost::any_cast<HttpHandler>(conn->getContext());
+    handler->init(http_router_);
+    //mutex_.lock();
+    //if (handler_map_.find(conn) == handler_map_.end()) {
+      //handler_map_[conn] =
+          //new HttpHandler; // FIXME 是否会引起conn增加引用计数？
+      //handler_map_[conn]->init(http_router_);
+      ////for (auto item : handler_map_) {
+      ////  LOG_INFO << "handler_map_ : " << item.first->getName();
+      ////}
+    //} else {
+      //LOG_TRACE << "conn is existing.";
     //}
-    if (handler_map_.find(conn) != handler_map_.end()) {
-      auto to_delete = handler_map_[conn];
-      delete (to_delete);
-      handler_map_.erase(conn);
-    } else {
-      LOG_FATAL << "handler's conn not exist!";
-    }
-    mutex_.unlock();
+    //mutex_.unlock();
   }
   //loop_->runInLoop(std::bind(&HttpServer::loop_on_connect, this, conn));
   //loop_on_connect(conn);
