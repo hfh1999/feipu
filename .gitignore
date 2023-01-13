@@ -1,4 +1,8 @@
 .clangd/*
+cmake-build-debug/*
+.idea/*
+.cache/*
+.cmake/*
 .vscode/*
+CMakeFiles/*
 build/*
-compile_commands.json
